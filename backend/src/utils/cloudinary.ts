@@ -14,16 +14,24 @@ interface File {
   path?: string;
 }
 
-const uploadFile = async (file: File): Promise<string | null> => {
+const uploadFile = async (
+  file: File,
+  subFolder: string
+): Promise<string | null> => {
   try {
     let response;
+    // Construct the folder path with 'eshop' as main directory
+    const folderPath = `eshop/${subFolder}`;
 
     if (process.env.MEMORY === "true") {
       if (!file || !file.buffer) return null;
 
       response = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { resource_type: "auto" },
+          {
+            resource_type: "auto",
+            folder: folderPath,
+          },
           (error, result) => {
             if (error) return reject(error);
             resolve(result);
@@ -37,10 +45,11 @@ const uploadFile = async (file: File): Promise<string | null> => {
 
       response = await cloudinary.uploader.upload(file.path, {
         resource_type: "auto",
+        folder: folderPath,
       });
       fs.unlinkSync(file.path);
     }
-    return (response as any).url;
+    return (response as any).secure_url;
   } catch (error) {
     console.error(error);
     if (process.env.MEMORY === "false" && file.path) {
