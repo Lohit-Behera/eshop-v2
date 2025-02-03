@@ -9,10 +9,12 @@ import { Toaster } from "@/components/ui/sonner";
 
 import Layout from "./Layout";
 import ProtectedLayout from "./pages/protected/ProtectedLayout";
+import AdminLayout from "./pages/admin/AdminLayout";
 import HomePage from "@/pages/protected/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import SignUpPage from "@/pages/SignUpPage";
 import VerifyPage from "@/pages/VerifyPage";
+import DashboardPage from "@/pages/admin/DashboardPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -23,6 +25,10 @@ const router = createBrowserRouter(
       {/* protected routes */}
       <Route path="/" element={<ProtectedLayout />}>
         <Route index element={<HomePage />} />
+      </Route>
+      {/* admin routes */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin/dashboard" element={<DashboardPage />} />
       </Route>
     </Route>
   )
