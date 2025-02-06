@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Package2, LayoutGrid, Image } from "lucide-react";
+import { Package2, LayoutGrid, Image, SquarePlus, List } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -27,11 +27,13 @@ const data = {
       items: [
         {
           title: "Add Product",
-          url: "#",
+          url: "/admin/product/add",
+          icon: SquarePlus,
         },
         {
           title: "All Products",
-          url: "#",
+          url: "/admin/product",
+          icon: List,
         },
       ],
     },
@@ -42,11 +44,13 @@ const data = {
       items: [
         {
           title: "Add Category",
-          url: "#",
+          url: "/admin/category/add",
+          icon: SquarePlus,
         },
         {
           title: "All Category",
-          url: "#",
+          url: "/admin/category",
+          icon: List,
         },
       ],
     },
@@ -57,11 +61,13 @@ const data = {
       items: [
         {
           title: "Add Banner",
-          url: "#",
+          url: "/admin/banner/add",
+          icon: SquarePlus,
         },
         {
           title: "All Banner",
-          url: "#",
+          url: "/admin/banner",
+          icon: List,
         },
       ],
     },

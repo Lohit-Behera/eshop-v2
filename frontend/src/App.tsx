@@ -14,7 +14,11 @@ import HomePage from "@/pages/protected/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import SignUpPage from "@/pages/SignUpPage";
 import VerifyPage from "@/pages/VerifyPage";
+
+// import admin pages
 import DashboardPage from "@/pages/admin/DashboardPage";
+import AddCategory from "./pages/admin/category/AddCategory";
+import AllCategoryPage from "./pages/admin/category/AllCategoryPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,6 +33,8 @@ const router = createBrowserRouter(
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="/admin/dashboard" element={<DashboardPage />} />
+        <Route path="/admin/category/add" element={<AddCategory />} />
+        <Route path="/admin/category" element={<AllCategoryPage />} />
       </Route>
     </Route>
   )

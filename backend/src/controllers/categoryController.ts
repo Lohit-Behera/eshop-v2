@@ -10,7 +10,7 @@ const createCategory = asyncHandler(async (req, res) => {
   const schema = Joi.object({
     name: Joi.string().min(3).max(50).required(),
     isPublic: Joi.boolean().required(),
-    subcategories: Joi.array()
+    subCategories: Joi.array()
       .items(
         Joi.object({
           name: Joi.string().min(3).max(50).required(),
@@ -28,7 +28,7 @@ const createCategory = asyncHandler(async (req, res) => {
       .status(400)
       .json(new ApiResponse(400, null, error.details[0].message));
   }
-  const { name, isPublic, subcategories } = value;
+  const { name, isPublic, subCategories } = value;
   // check if category already exists
   const categoryExists = await Category.findOne({ name });
   if (categoryExists) {
@@ -62,11 +62,22 @@ const createCategory = asyncHandler(async (req, res) => {
     name,
     isPublic,
     thumbnail: thumbnailUrl,
-    subcategories,
+    subCategories,
   });
+  // validate the category
+  const createdCategory = await Category.findById(category._id);
+  if (!createdCategory) {
+    return res
+      .status(500)
+      .json(
+        new ApiResponse(500, null, "Something went wrong while adding category")
+      );
+  }
   return res
     .status(201)
-    .json(new ApiResponse(201, category, "Category created successfully"));
+    .json(
+      new ApiResponse(201, createdCategory, "Category created successfully")
+    );
 });
 
 const getCategory = asyncHandler(async (req, res) => {
@@ -83,6 +94,11 @@ const getCategory = asyncHandler(async (req, res) => {
 
 const getAllCategories = asyncHandler(async (req, res) => {
   const categories = await Category.find().sort({ createdAt: -1 });
+  if (!categories) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Categories not found"));
+  }
   return res
     .status(200)
     .json(new ApiResponse(200, categories, "Categories found successfully"));
@@ -116,7 +132,7 @@ const updateCategory = asyncHandler(async (req, res) => {
   const schema = Joi.object({
     name: Joi.string().min(3).max(50).optional(),
     isPublic: Joi.boolean().optional(),
-    subcategories: Joi.array()
+    subCategories: Joi.array()
       .items(
         Joi.object({
           name: Joi.string().min(3).max(50).optional(),
@@ -178,11 +194,11 @@ const updateCategory = asyncHandler(async (req, res) => {
     hasUpdates = true;
   }
   if (
-    value.subcategories !== undefined &&
-    JSON.stringify(value.subcategories) !==
+    value.subCategories !== undefined &&
+    JSON.stringify(value.subCategories) !==
       JSON.stringify(category.subCategories)
   ) {
-    category.subCategories = value.subcategories;
+    category.subCategories = value.subCategories;
     hasUpdates = true;
   }
 

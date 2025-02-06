@@ -29,7 +29,9 @@ function AdminLayout() {
                 <SidebarTrigger />
               </nav>
             </header>
-            <Outlet />
+            <div className="flex flex-1 justify-center items-center">
+              <Outlet />
+            </div>
           </SidebarInset>
         </SidebarProvider>
       ) : null}

@@ -14,7 +14,7 @@ import {
 const categoryRouter = Router();
 
 categoryRouter.post(
-  "/create",
+  "/add",
   authMiddleware,
   adminMiddleware,
   upload.single("thumbnail"),
@@ -22,7 +22,7 @@ categoryRouter.post(
   createCategory
 );
 categoryRouter.get("/:categoryId", authMiddleware, getCategory);
-categoryRouter.get("/", authMiddleware, getAllCategories);
+categoryRouter.get("/get/all", authMiddleware, getAllCategories);
 categoryRouter.patch(
   "/:categoryId",
   authMiddleware,
@@ -37,3 +37,5 @@ categoryRouter.delete(
   adminMiddleware,
   deleteCategory
 );
+
+export default categoryRouter;

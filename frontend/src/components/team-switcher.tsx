@@ -4,12 +4,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
 
 export function TeamSwitcher() {
+  const navigate = useNavigate();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton
+          onClick={() => navigate("/admin/dashboard")}
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
