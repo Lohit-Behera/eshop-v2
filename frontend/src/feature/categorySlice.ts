@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import { baseUrl } from "@/lib/proxy";
 
 // type
-interface Category {
+export interface Category {
   _id: string;
   name: string;
   isPublic: boolean;
@@ -73,6 +73,32 @@ export const fetchAllCategories = createAsyncThunk(
   }
 );
 
+export const fetchGetCategory = createAsyncThunk(
+  "category/getCategory",
+  async (categoryId: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.get(
+        `${baseUrl}/api/v1/category/${categoryId}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "An unknown error occurred while getting category";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const categorySlice = createSlice({
   name: "category",
   initialState: {
@@ -83,6 +109,10 @@ const categorySlice = createSlice({
     getAllCategories: { data: [] as Category[] },
     getAllCategoriesStatus: "idle",
     getAllCategoriesError: {},
+
+    getCategory: { data: {} as Category },
+    getCategoryStatus: "idle",
+    getCategoryError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -111,6 +141,19 @@ const categorySlice = createSlice({
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.getAllCategoriesStatus = "failed";
         state.getAllCategoriesError = action.error;
+      })
+
+      // get category
+      .addCase(fetchGetCategory.pending, (state) => {
+        state.getCategoryStatus = "loading";
+      })
+      .addCase(fetchGetCategory.fulfilled, (state, action) => {
+        state.getCategoryStatus = "succeeded";
+        state.getCategory = action.payload;
+      })
+      .addCase(fetchGetCategory.rejected, (state, action) => {
+        state.getCategoryStatus = "failed";
+        state.getCategoryError = action.error;
       });
   },
 });

@@ -19,6 +19,7 @@ import VerifyPage from "@/pages/VerifyPage";
 import DashboardPage from "@/pages/admin/DashboardPage";
 import AddCategory from "./pages/admin/category/AddCategory";
 import AllCategoryPage from "./pages/admin/category/AllCategoryPage";
+import UpdateCategoryPage from "./pages/admin/category/UpdateCategoryPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -35,6 +36,10 @@ const router = createBrowserRouter(
         <Route path="/admin/dashboard" element={<DashboardPage />} />
         <Route path="/admin/category/add" element={<AddCategory />} />
         <Route path="/admin/category" element={<AllCategoryPage />} />
+        <Route
+          path="/admin/category/update/:categoryId"
+          element={<UpdateCategoryPage />}
+        />
       </Route>
     </Route>
   )

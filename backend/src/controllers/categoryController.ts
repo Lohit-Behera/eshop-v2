@@ -81,7 +81,7 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 const getCategory = asyncHandler(async (req, res) => {
-  const category = await Category.findById(req.params.id);
+  const category = await Category.findById(req.params.categoryId);
   if (!category) {
     return res
       .status(404)
