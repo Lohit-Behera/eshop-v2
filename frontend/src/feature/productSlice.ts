@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { baseUrl } from "@/lib/proxy";
 
-interface Product {
+export interface Product {
   _id: string;
   name: string;
   originalPrice: number;
@@ -16,7 +16,7 @@ interface Product {
   productDetails: string;
   productDescription: string;
   thumbnail: string;
-  image: string[];
+  images: string[];
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -109,7 +109,7 @@ const productSlice = createSlice({
     productStatus: "idle",
     productError: {},
 
-    allProducts: {},
+    allProducts: { data: [] as Product[] },
     allProductsStatus: "idle",
     allProductsError: {},
   },

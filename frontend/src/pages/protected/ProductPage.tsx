@@ -14,9 +14,17 @@ import {
   DisclosureContent,
   DisclosureTrigger,
 } from "@/components/ui/disclosure";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 function ProductPage() {
   const { productId } = useParams();
+  const [images, setImages] = useState<string[]>([]);
+
+  const [index, setIndex] = useState(0);
   const product = useSelector((state: RootState) => state.product.product.data);
   const productStatus = useSelector(
     (state: RootState) => state.product.productStatus
@@ -27,6 +35,14 @@ function ProductPage() {
     if (productId) getProduct(productId);
   }, [productId]);
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    if (productStatus === "succeeded") {
+      if (product.images.length > 0) {
+        setImages([product.thumbnail, ...product.images]);
+      }
+    }
+  }, [productStatus]);
 
   const decreaseQuantity = () => setQuantity((prev) => Math.max(prev - 1, 1));
   const increaseQuantity = () =>
@@ -46,13 +62,40 @@ function ProductPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <img
-                src={product.thumbnail || "/placeholder.svg"}
-                alt={product.name}
-                width={500}
-                height={500}
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
+              <div className="relative w-full py-8">
+                <Carousel index={index} onIndexChange={setIndex}>
+                  <CarouselContent className="relative">
+                    {images.map((item) => {
+                      return (
+                        <CarouselItem key={item} className="p-4">
+                          <div className="flex aspect-square items-center justify-center border border-zinc-200 dark:border-zinc-800">
+                            <img
+                              src={item}
+                              alt=""
+                              className="pointer-events-none"
+                            />
+                          </div>
+                        </CarouselItem>
+                      );
+                    })}
+                  </CarouselContent>
+                </Carousel>
+                <div className="flex w-full justify-center space-x-3 px-4">
+                  {images.map((item, index) => {
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        aria-label={`Go to slide ${item}`}
+                        onClick={() => setIndex(index)}
+                        className="h-12 w-12 border border-zinc-200 dark:border-zinc-800"
+                      >
+                        <img src={item} alt="" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 50 }}
