@@ -20,6 +20,7 @@ import DashboardPage from "@/pages/admin/DashboardPage";
 import AddCategory from "./pages/admin/category/AddCategory";
 import AllCategoryPage from "./pages/admin/category/AllCategoryPage";
 import UpdateCategoryPage from "./pages/admin/category/UpdateCategoryPage";
+import AddProductPage from "./pages/admin/product/AddProductPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -34,12 +35,15 @@ const router = createBrowserRouter(
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="/admin/dashboard" element={<DashboardPage />} />
+        {/* Admin Category */}
         <Route path="/admin/category/add" element={<AddCategory />} />
         <Route path="/admin/category" element={<AllCategoryPage />} />
         <Route
           path="/admin/category/update/:categoryId"
           element={<UpdateCategoryPage />}
         />
+        {/* Admin Product */}
+        <Route path="/admin/product/add" element={<AddProductPage />} />
       </Route>
     </Route>
   )

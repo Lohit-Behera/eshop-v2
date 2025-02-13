@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { GlowInput } from "@/components/ui/glow-input";
 import {
   Form,
   FormControl,
@@ -112,7 +112,7 @@ function LoginPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Email" {...field} />
+                    <GlowInput placeholder="Email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
