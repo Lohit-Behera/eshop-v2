@@ -15,6 +15,9 @@ import LoginPage from "@/pages/LoginPage";
 import SignUpPage from "@/pages/SignUpPage";
 import VerifyPage from "@/pages/VerifyPage";
 
+// import protected pages
+import ProductPage from "./pages/protected/ProductPage";
+
 // import admin pages
 import DashboardPage from "@/pages/admin/DashboardPage";
 import AddCategory from "./pages/admin/category/AddCategory";
@@ -31,6 +34,7 @@ const router = createBrowserRouter(
       {/* protected routes */}
       <Route path="/" element={<ProtectedLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="/product/:productId" element={<ProductPage />} />
       </Route>
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>

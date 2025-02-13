@@ -7,7 +7,7 @@ import { uploadFile, deleteFile } from "../utils/cloudinary";
 const createProduct = asyncHandler(async (req, res) => {
   // joi schema for validation
   const schema = Joi.object({
-    name: Joi.string().min(3).max(50).required(),
+    name: Joi.string().min(3).required(),
     originalPrice: Joi.number().required(),
     sellingPrice: Joi.number().required(),
     quantity: Joi.number().required(),
@@ -47,20 +47,18 @@ const createProduct = asyncHandler(async (req, res) => {
       .status(400)
       .json(new ApiResponse(400, null, "Product already exists"));
   }
-  let thumbnail;
-  let images;
-  if (Array.isArray(req.files)) {
-    if (Array.isArray(req.files[0])) {
-      thumbnail = req.files[0][0];
-    }
-    images = req.files[1];
-  }
+
+  const thumbnail = Array.isArray(req.files)
+    ? undefined
+    : req.files?.thumbnail?.[0];
+
   if (!thumbnail) {
     return res
       .status(400)
       .json(new ApiResponse(400, null, "Thumbnail is required"));
   }
   const thumbnailUrl = await uploadFile(thumbnail, "product");
+  const images = Array.isArray(req.files) ? undefined : req.files?.images;
   let imageUrl;
   if (Array.isArray(images) && images.length > 0) {
     for (let i = 0; i < images.length; i++) {
@@ -91,7 +89,7 @@ const createProduct = asyncHandler(async (req, res) => {
   }
   return res
     .status(200)
-    .json(new ApiResponse(200, createdProduct, "Product created successfully"));
+    .json(new ApiResponse(200, product._id, "Product created successfully"));
 });
 
 const productDetails = asyncHandler(async (req, res) => {
