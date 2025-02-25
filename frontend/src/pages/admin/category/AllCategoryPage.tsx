@@ -1,8 +1,5 @@
-import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { fetchAllCategories } from "@/feature/categorySlice";
-import { useAsyncDispatch } from "@/hooks/dispatch";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 import { useSearchParams } from "react-router-dom";
@@ -16,10 +13,7 @@ function AllCategoryPage() {
   const getAllCategoriesStatus = useSelector(
     (state: RootState) => state.category.getAllCategoriesStatus
   );
-  const fetchAll = useAsyncDispatch(fetchAllCategories);
-  useEffect(() => {
-    fetchAll();
-  }, []);
+
   return (
     <>
       {getAllCategoriesStatus === "loading" ? (

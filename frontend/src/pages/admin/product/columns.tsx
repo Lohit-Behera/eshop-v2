@@ -105,8 +105,16 @@ export const columns: ColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       return (
-        <p className="flex justify-center text-center">
-          {row.original.isPublic ? "Yes" : "No"}
+        <p className="text-center">
+          {row.original.isPublic ? (
+            <span className="flex items-center">
+              <Users2 className="w-4 h-4 mr-1" /> Public
+            </span>
+          ) : (
+            <span className="flex items-center">
+              <LockKeyhole className="w-4 h-4 mr-1" /> Private
+            </span>
+          )}
         </p>
       );
     },

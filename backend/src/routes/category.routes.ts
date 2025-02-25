@@ -22,7 +22,6 @@ categoryRouter.post(
   createCategory
 );
 categoryRouter.get("/:categoryId", authMiddleware, getCategory);
-categoryRouter.get("/get/all", authMiddleware, getAllCategories);
 categoryRouter.patch(
   "/:categoryId",
   authMiddleware,
@@ -37,5 +36,6 @@ categoryRouter.delete(
   adminMiddleware,
   deleteCategory
 );
-
+// public routes
+categoryRouter.get("/get/all", getAllCategories);
 export default categoryRouter;

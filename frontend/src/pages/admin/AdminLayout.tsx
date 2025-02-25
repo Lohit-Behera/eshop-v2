@@ -14,7 +14,7 @@ function AdminLayout() {
   const userDetails = useSelector((state: RootState) => state.user.userDetails);
 
   useEffect(() => {
-    if (userDetails?.role !== "admin") {
+    if (userDetails && userDetails?.role !== "admin") {
       navigate("/");
     }
   }, []);
