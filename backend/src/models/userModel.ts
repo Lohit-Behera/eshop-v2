@@ -11,6 +11,8 @@ export interface IUser extends Document {
   role: "user" | "seller" | "admin";
   isVerified: boolean;
   token?: string;
+  countryCode?: string;
+  phoneNumber?: string;
   otp?: { code: string; expiresAt: Date };
   refreshToken?: string | null;
   comparePassword(password: string): Promise<boolean>;
@@ -52,6 +54,14 @@ const userSchema = new Schema(
     },
     token: {
       type: String,
+    },
+    countryCode: {
+      type: String,
+    },
+    phoneNumber: {
+      type: Number,
+      unique: true,
+      sparse: true,
     },
     otp: {
       code: { type: String },
