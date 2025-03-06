@@ -98,6 +98,59 @@ export const fetchAllProducts = createAsyncThunk(
   }
 );
 
+export const fetchUpdateProduct = createAsyncThunk(
+  "product/update",
+  async (product: FormData, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.patch(
+        `${baseUrl}/api/v1/product/update`,
+        product,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while updating the product";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const fetchDeleteProduct = createAsyncThunk(
+  "product/delete",
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.delete(
+        `${baseUrl}/api/v1/product/delete/${productId}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while deleting the product";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState: {
@@ -112,6 +165,14 @@ const productSlice = createSlice({
     allProducts: { data: [] as Product[] },
     allProductsStatus: "idle",
     allProductsError: {},
+
+    updateProduct: {},
+    updateProductStatus: "idle",
+    updateProductError: {},
+
+    deleteProduct: {},
+    deleteProductStatus: "idle",
+    deleteProductError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -155,6 +216,32 @@ const productSlice = createSlice({
         state.allProductsError =
           action.payload ||
           "Something went wrong while getting all the products";
+      })
+      // update product
+      .addCase(fetchUpdateProduct.pending, (state) => {
+        state.updateProductStatus = "loading";
+      })
+      .addCase(fetchUpdateProduct.fulfilled, (state, action) => {
+        state.updateProductStatus = "succeeded";
+        state.updateProduct = action.payload;
+      })
+      .addCase(fetchUpdateProduct.rejected, (state, action) => {
+        state.updateProductStatus = "failed";
+        state.updateProductError =
+          action.payload || "Something went wrong while updating the product";
+      })
+      // delete product
+      .addCase(fetchDeleteProduct.pending, (state) => {
+        state.deleteProductStatus = "loading";
+      })
+      .addCase(fetchDeleteProduct.fulfilled, (state, action) => {
+        state.deleteProductStatus = "succeeded";
+        state.deleteProduct = action.payload;
+      })
+      .addCase(fetchDeleteProduct.rejected, (state, action) => {
+        state.deleteProductStatus = "failed";
+        state.deleteProductError =
+          action.payload || "Something went wrong while deleting the product";
       });
   },
 });

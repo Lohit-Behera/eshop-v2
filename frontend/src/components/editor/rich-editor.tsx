@@ -2,6 +2,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
 import EditorToolbar from "./toolbar/editor-toolbar";
+import { useEffect } from "react";
 
 interface EditorProps {
   content: string;
@@ -17,6 +18,12 @@ const Editor = ({ content, placeholder, onChange }: EditorProps) => {
       onChange(editor.getHTML());
     },
   });
+
+  useEffect(() => {
+    if (editor && content && editor.getHTML() !== content) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   if (!editor) return <></>;
 

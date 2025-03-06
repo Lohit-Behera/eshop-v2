@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,11 +37,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Pencil, Square, SquarePlus, X } from "lucide-react";
+import { Loader2, Pencil, SquarePlus, X } from "lucide-react";
 import { useAsyncDispatch, useDispatchWithToast } from "@/hooks/dispatch";
-import { fetchProduct } from "@/feature/productSlice";
+import { fetchProduct, fetchUpdateProduct } from "@/feature/productSlice";
 //TODO : Update product
-const createProductSchema = z.object({
+const updateProductSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
   originalPrice: z.number().min(1, { message: "Price must be at least 1" }),
   sellingPrice: z.number().min(1, { message: "Price must be at least 1" }),
@@ -68,7 +68,8 @@ const createProductSchema = z.object({
       {
         message: "Only .jpg, .png, and .gif formats are supported.",
       }
-    ),
+    )
+    .optional(),
   images: z
     .array(
       z
@@ -89,14 +90,13 @@ const createProductSchema = z.object({
           })
         )
     )
-    .min(1, { message: "At least one thumbnail is required." })
-    .max(5, { message: "You can upload up to 5 thumbnails." }),
+    .max(5, { message: "You can upload up to 5 thumbnails." })
+    .optional(),
   isPublic: z.boolean(),
 });
 
 function AddProductPage() {
   const { productId } = useParams();
-  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [discount, setDiscount] = useState<number | undefined>(undefined);
@@ -111,8 +111,8 @@ function AddProductPage() {
     (state: RootState) => state.product.productStatus
   );
 
-  const form = useForm<z.infer<typeof createProductSchema>>({
-    resolver: zodResolver(createProductSchema),
+  const form = useForm<z.infer<typeof updateProductSchema>>({
+    resolver: zodResolver(updateProductSchema),
     defaultValues: {
       name: "",
       originalPrice: undefined,
@@ -139,24 +139,71 @@ function AddProductPage() {
 
   useEffect(() => {
     if (productStatus === "succeeded") {
+      setDiscount(product.discount);
+      setSelectedCategory(product.category);
       form.reset({
         name: product.name,
         originalPrice: product.originalPrice,
         sellingPrice: product.sellingPrice,
         quantity: product.quantity,
         category: product.category,
-        subCategory: product.subCategory,
         brand: product.brand,
         productDetails: product.productDetails,
         productDescription: product.productDescription,
         isPublic: product.isPublic,
       });
-      setDiscount(product.discount);
+      if (selectedCategory) {
+        form.setValue("subCategory", product.subCategory);
+      }
     }
-  }, [productStatus]);
+  }, [productStatus, product, selectedCategory, form]);
 
-  function onSubmit(data: z.infer<typeof createProductSchema>) {
-    console.log(data);
+  const updateProduct = useDispatchWithToast(fetchUpdateProduct, {
+    loadingMessage: "Updating product...",
+    getSuccessMessage(data) {
+      return data.message || "Product updated successfully";
+    },
+    getErrorMessage(error) {
+      return (
+        error || error.message || "Something went wrong while updating product"
+      );
+    },
+    onSuccess() {
+      setIsVisible(false);
+      getProduct(product._id);
+    },
+    onError() {
+      setIsVisible(false);
+    },
+  });
+
+  function onSubmit(data: z.infer<typeof updateProductSchema>) {
+    setIsVisible(true);
+    const formData = new FormData();
+    formData.append("productId", product._id);
+    formData.append("name", data.name);
+    formData.append("originalPrice", data.originalPrice.toString());
+    formData.append("sellingPrice", data.sellingPrice.toString());
+    formData.append("quantity", data.quantity.toString());
+    formData.append("category", data.category);
+    formData.append("subCategory", data.subCategory);
+    formData.append("brand", data.brand);
+    formData.append("isPublic", data.isPublic.toString());
+    formData.append("productDetails", data.productDetails);
+    formData.append("productDescription", data.productDescription);
+    if (discount !== undefined) {
+      formData.append("discount", discount.toString());
+    }
+
+    if (data.thumbnail) {
+      formData.append("thumbnail", data.thumbnail);
+    }
+    if (data.images) {
+      data.images.forEach((image) => {
+        formData.append("images", image);
+      });
+    }
+    updateProduct(formData);
   }
   return (
     <div className="relative w-full">
@@ -356,7 +403,7 @@ function AddProductPage() {
                           field.onChange(value);
                           setSelectedCategory(value);
                         }}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -394,7 +441,7 @@ function AddProductPage() {
                         <FormLabel>Sub Category</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -505,7 +552,7 @@ function AddProductPage() {
                     <FormControl>
                       <Editor
                         placeholder="Product Description"
-                        content={field.value}
+                        content={field.value || ""}
                         onChange={field.onChange}
                       />
                     </FormControl>
@@ -522,7 +569,7 @@ function AddProductPage() {
                     <FormControl>
                       <Editor
                         placeholder="Product description"
-                        content={field.value}
+                        content={field.value || ""}
                         onChange={field.onChange}
                       />
                     </FormControl>

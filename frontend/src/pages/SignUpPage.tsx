@@ -35,6 +35,7 @@ import {
 import { useLayoutEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { GlowInput } from "@/components/ui/glow-input";
 
 const FormSchema = z
   .object({
@@ -169,7 +170,7 @@ function SignUpPage() {
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="full Name" {...field} />
+                      <GlowInput placeholder="full Name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -182,7 +183,7 @@ function SignUpPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Email" {...field} />
+                      <GlowInput placeholder="Email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -195,12 +196,12 @@ function SignUpPage() {
                   <FormItem>
                     <FormLabel>Avatar</FormLabel>
                     <FormControl>
-                      <Input
+                      <GlowInput
+                        placeholder="Avatar"
                         type="file"
                         onChange={(e) =>
                           field.onChange(e.target.files?.[0] || null)
                         }
-                        placeholder="Avatar"
                       />
                     </FormControl>
                     <FormMessage />

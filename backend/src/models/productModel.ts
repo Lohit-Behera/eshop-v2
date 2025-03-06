@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-interface IProduct {
+export interface IProduct {
   name: string;
   originalPrice: number;
   sellingPrice: number;

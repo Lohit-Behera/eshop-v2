@@ -6,6 +6,8 @@ import {
   createProduct,
   allProducts,
   productDetails,
+  updateProduct,
+  deleteProduct,
 } from "../controllers/productController";
 
 const productRouter = Router();
@@ -24,5 +26,18 @@ productRouter.post(
 productRouter.get("/all", authMiddleware, allProducts);
 
 productRouter.get("/:productId", authMiddleware, productDetails);
+
+productRouter.patch(
+  "/update",
+  authMiddleware,
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "images", maxCount: 4 },
+  ]),
+  resizeImage,
+  updateProduct
+);
+
+productRouter.delete("/delete/:productId", authMiddleware, deleteProduct);
 
 export default productRouter;
