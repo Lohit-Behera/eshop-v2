@@ -14,6 +14,7 @@ import HomePage from "@/pages/protected/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import SignUpPage from "@/pages/SignUpPage";
 import VerifyPage from "@/pages/VerifyPage";
+import SessionExpiredPage from "./pages/SessionExpiredPage";
 
 // import protected pages
 import ProductPage from "./pages/protected/ProductPage";
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/verify/:token" element={<VerifyPage />} />
+      <Route path="/session-expired" element={<SessionExpiredPage />} />
       {/* protected routes */}
       <Route path="/" element={<ProtectedLayout />}>
         <Route index element={<HomePage />} />

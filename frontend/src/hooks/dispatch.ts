@@ -3,6 +3,7 @@ import { AppDispatch } from "@/store/store";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { AsyncThunk } from "@reduxjs/toolkit";
+import { reSignIn } from "@/feature/authSlice";
 
 interface ToastOptions<TResult> {
   loadingMessage?: string;
@@ -46,12 +47,15 @@ export const useDispatchWithToast = <TData = void, TResult = void>(
       error: (err: any) => {
         if (err === "Refresh token expired") {
           toast.error("Session expired. Please log in again.");
+          dispatch(reSignIn());
           navigate("/session-expired");
         } else if (err === "Session expired") {
           toast.error("Session expired. Please log in again.");
+          dispatch(reSignIn());
           navigate("/session-expired");
         } else if (err === "Invalid token: User not found") {
           toast.error("User not found or token invalid. Please log in again.");
+          dispatch(reSignIn());
           navigate("/session-expired");
         }
         if (onError) onError(err);
@@ -80,12 +84,15 @@ export const useAsyncDispatch = <TData = void, TResult = void>(
     } catch (error) {
       if (error === "Refresh token expired") {
         toast.error("Session expired. Please log in again.");
+        dispatch(reSignIn());
         navigate("/session-expired");
       } else if (error === "Session expired") {
         toast.error("Session expired. Please log in again.");
+        dispatch(reSignIn());
         navigate("/session-expired");
       } else if (error === "Invalid token: User not found") {
         toast.error("User not found or token invalid. Please log in again.");
+        dispatch(reSignIn());
         navigate("/session-expired");
       }
       if (onError) onError(error);

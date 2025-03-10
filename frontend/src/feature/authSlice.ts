@@ -137,7 +137,13 @@ const authSlice = createSlice({
     verifyStatus: "idle",
     verifyError: {},
   },
-  reducers: {},
+  reducers: {
+    reSignIn: (state) => {
+      state.userInfo = null;
+      document.cookie =
+        "userInfoEShop=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    },
+  },
   extraReducers: (builder) => {
     builder
       // sign up
@@ -198,5 +204,7 @@ const authSlice = createSlice({
       });
   },
 });
+
+export const { reSignIn } = authSlice.actions;
 
 export default authSlice.reducer;
