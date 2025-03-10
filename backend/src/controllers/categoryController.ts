@@ -117,7 +117,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
   }
   // delete thumbnail from cloudinary
   if (category.thumbnail) {
-    await deleteFile(category.thumbnail, res);
+    await deleteFile(category.thumbnail, "eshop/category", res);
   }
   // delete the blog
   await Category.findByIdAndDelete(category._id);
@@ -179,7 +179,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     }
     // delete thumbnail from cloudinary
     if (category.thumbnail) {
-      await deleteFile(category.thumbnail, res);
+      await deleteFile(category.thumbnail, "eshop/category", res);
     }
     category.thumbnail = thumbnailUrl;
     hasUpdates = true;

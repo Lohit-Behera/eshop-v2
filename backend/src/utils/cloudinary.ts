@@ -63,6 +63,7 @@ const uploadFile = async (
 
 const deleteFile = async (
   filePath: string | undefined,
+  folder: string,
   res: Response
 ): Promise<any> => {
   try {
@@ -72,12 +73,15 @@ const deleteFile = async (
         .json(new ApiResponse(500, {}, "File path not provided"));
     }
     const filePublicId = filePath.split("/")?.pop()?.split(".")[0];
+
     if (!filePublicId) {
       return res
         .status(500)
         .json(new ApiResponse(500, {}, "Invalid file path"));
     }
-    const response = await cloudinary.uploader.destroy(filePublicId);
+    const response = await cloudinary.uploader.destroy(
+      folder + "/" + filePublicId
+    );
     return response;
   } catch (error: any) {
     return res

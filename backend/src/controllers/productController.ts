@@ -75,10 +75,20 @@ const createProduct = asyncHandler(async (req, res) => {
   }
   const thumbnailUrl = await uploadFile(thumbnail, "product");
   const images = Array.isArray(req.files) ? undefined : req.files?.images;
-  let imageUrl;
-  if (Array.isArray(images) && images.length > 0) {
-    for (let i = 0; i < images.length; i++) {
-      imageUrl = await uploadFile(images[i], "product");
+  let imageUrls: string[] = [];
+  if (req.files && !Array.isArray(req.files) && req.files.images) {
+    const images = req.files.images;
+    if (Array.isArray(images) && images.length > 0) {
+      // Use Promise.all for parallel uploads and wait for all to complete
+      const uploadPromises = images.map((image) =>
+        uploadFile(image, "product")
+      );
+      const results = await Promise.all(uploadPromises);
+
+      // Filter out any failed uploads (undefined results)
+      results.forEach((url) => {
+        if (url) imageUrls.push(url);
+      });
     }
   }
 
@@ -95,7 +105,7 @@ const createProduct = asyncHandler(async (req, res) => {
     productDetails,
     productDescription,
     thumbnail: thumbnailUrl,
-    images: imageUrl,
+    images: imageUrls,
   });
   const createdProduct = await Product.findById(product._id);
   if (!createdProduct) {
@@ -207,23 +217,38 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
     // delete thumbnail from cloudinary
     if (product.thumbnail) {
-      await deleteFile(product.thumbnail, res);
+      await deleteFile(product.thumbnail, "eshop/product", res);
     }
     updates.thumbnail = thumbnailUrl;
     hasUpdates = true;
   }
 
-  const images = Array.isArray(req.files) ? undefined : req.files?.images;
-
-  if (images) {
-    let imageUrl: string[] | undefined = [];
+  if (req.files && !Array.isArray(req.files) && req.files.images) {
+    const images = req.files.images;
     if (Array.isArray(images) && images.length > 0) {
-      for (let i = 0; i < images.length; i++) {
-        uploadFile(images[i], "product").then((url) => {
-          if (url) {
-            imageUrl.push(url);
-          }
-        });
+      const imageUrls: string[] = [];
+
+      // Use Promise.all for parallel uploads and wait for all to complete
+      const uploadPromises = images.map((image) =>
+        uploadFile(image, "product")
+      );
+      const results = await Promise.all(uploadPromises);
+
+      // Filter out any failed uploads (undefined results)
+      results.forEach((url) => {
+        if (url) imageUrls.push(url);
+      });
+
+      if (imageUrls.length > 0) {
+        // Delete old images if they exist
+        if (product.images && product.images.length > 0) {
+          await Promise.all(
+            product.images.map((img) => deleteFile(img, "eshop/product", res))
+          );
+        }
+
+        updates.images = imageUrls;
+        hasUpdates = true;
       }
     }
   }
@@ -250,11 +275,11 @@ const deleteProduct = asyncHandler(async (req, res) => {
       .json(new ApiResponse(404, null, "Product not found"));
   }
   if (product.thumbnail) {
-    await deleteFile(product.thumbnail, res);
+    await deleteFile(product.thumbnail, "eshop/product", res);
   }
   if (product.images) {
     for (let i = 0; i < product.images.length; i++) {
-      await deleteFile(product.images[i], res);
+      await deleteFile(product.images[i], "eshop/product", res);
     }
   }
   await Product.findByIdAndDelete(productId);
