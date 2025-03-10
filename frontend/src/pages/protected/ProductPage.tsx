@@ -19,6 +19,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import Reviews from "@/components/Reviews";
 
 function ProductPage() {
   const { productId } = useParams();
@@ -55,16 +56,17 @@ function ProductPage() {
       ) : productStatus === "failed" ? (
         <p>Something went wrong</p>
       ) : productStatus === "succeeded" ? (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 grid gap-4">
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
+              className=""
             >
-              <div className="relative w-full py-8">
+              <div className="relative w-full py-8 max-h-[60vh]">
                 <Carousel index={index} onIndexChange={setIndex}>
-                  <CarouselContent className="relative">
+                  <CarouselContent className="relative max-h-[50vh] mb-4">
                     {images.map((item) => {
                       return (
                         <CarouselItem key={item} className="p-4">
@@ -230,6 +232,7 @@ function ProductPage() {
               </div>
             </motion.div>
           </div>
+          <Reviews productId={product._id} />
         </div>
       ) : null}
     </>

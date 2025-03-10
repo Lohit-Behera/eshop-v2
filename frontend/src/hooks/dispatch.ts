@@ -47,6 +47,12 @@ export const useDispatchWithToast = <TData = void, TResult = void>(
         if (err === "Refresh token expired") {
           toast.error("Session expired. Please log in again.");
           navigate("/session-expired");
+        } else if (err === "Session expired") {
+          toast.error("Session expired. Please log in again.");
+          navigate("/session-expired");
+        } else if (err === "Invalid token: User not found") {
+          toast.error("User not found or token invalid. Please log in again.");
+          navigate("/session-expired");
         }
         if (onError) onError(err);
         return getErrorMessage(err);
@@ -74,6 +80,12 @@ export const useAsyncDispatch = <TData = void, TResult = void>(
     } catch (error) {
       if (error === "Refresh token expired") {
         toast.error("Session expired. Please log in again.");
+        navigate("/session-expired");
+      } else if (error === "Session expired") {
+        toast.error("Session expired. Please log in again.");
+        navigate("/session-expired");
+      } else if (error === "Invalid token: User not found") {
+        toast.error("User not found or token invalid. Please log in again.");
         navigate("/session-expired");
       }
       if (onError) onError(error);
