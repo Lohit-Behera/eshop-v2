@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 interface iSubCategory {
+  _id: string;
   name: string;
   isPublic: boolean;
 }

@@ -40,7 +40,7 @@ import {
 import { Loader2, Pencil, SquarePlus, X } from "lucide-react";
 import { useAsyncDispatch, useDispatchWithToast } from "@/hooks/dispatch";
 import { fetchProduct, fetchUpdateProduct } from "@/feature/productSlice";
-//TODO : Update product
+
 const updateProductSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
   originalPrice: z.number().min(1, { message: "Price must be at least 1" }),

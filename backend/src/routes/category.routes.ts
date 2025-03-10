@@ -9,6 +9,7 @@ import {
   getAllCategories,
   getCategory,
   updateCategory,
+  deleteSubCategory,
 } from "../controllers/categoryController";
 
 const categoryRouter = Router();
@@ -23,7 +24,7 @@ categoryRouter.post(
 );
 categoryRouter.get("/:categoryId", authMiddleware, getCategory);
 categoryRouter.patch(
-  "/:categoryId",
+  "/update",
   authMiddleware,
   adminMiddleware,
   upload.single("thumbnail"),
@@ -35,6 +36,12 @@ categoryRouter.delete(
   authMiddleware,
   adminMiddleware,
   deleteCategory
+);
+categoryRouter.delete(
+  "/sub/:categoryId/:subCategoryId",
+  authMiddleware,
+  adminMiddleware,
+  deleteSubCategory
 );
 // public routes
 categoryRouter.get("/get/all", getAllCategories);

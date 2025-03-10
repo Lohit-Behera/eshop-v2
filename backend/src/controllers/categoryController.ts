@@ -128,30 +128,28 @@ const deleteCategory = asyncHandler(async (req, res) => {
 });
 
 const updateCategory = asyncHandler(async (req, res) => {
-  // schema for validation
+  // Check if subCategories is a string and parse it
+  if (req.body.subCategories && typeof req.body.subCategories === "string") {
+    req.body.subCategories = JSON.parse(req.body.subCategories);
+  }
+
+  // Schema for validation
   const schema = Joi.object({
+    categoryId: Joi.string(),
     name: Joi.string().min(3).max(50).optional(),
     isPublic: Joi.boolean().optional(),
     subCategories: Joi.array()
       .items(
         Joi.object({
-          name: Joi.string().min(3).max(50).optional(),
-          isPublic: Joi.boolean().optional(),
+          name: Joi.string().min(3).max(50).required(),
+          isPublic: Joi.boolean().required(),
+          _id: Joi.string().optional(),
         })
       )
       .min(1)
       .optional(),
   });
-  // get category id from the params
-  const { categoryId } = req.params;
-  // get category
-  const category = await Category.findById(categoryId);
-  // validate the category
-  if (!category) {
-    return res
-      .status(404)
-      .json(new ApiResponse(404, null, "Category not found"));
-  }
+
   // Validate request body
   const { error, value } = schema.validate(req.body);
   if (error) {
@@ -160,9 +158,19 @@ const updateCategory = asyncHandler(async (req, res) => {
       .json(new ApiResponse(400, null, error.details[0].message));
   }
 
+  // Get category using ID from params
+  const category = await Category.findById(value.categoryId);
+
+  // Validate the category
+  if (!category) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Category not found"));
+  }
+
   let hasUpdates = false;
 
-  // get thumbnail from the request
+  // Process thumbnail if provided
   const thumbnail = req.file;
   if (thumbnail) {
     if (!thumbnail.mimetype.startsWith("image/")) {
@@ -170,34 +178,40 @@ const updateCategory = asyncHandler(async (req, res) => {
         .status(400)
         .json(new ApiResponse(400, null, "File is not an image"));
     }
-    // upload thumbnail to cloudinary
+
+    // Upload thumbnail to cloudinary
     const thumbnailUrl = await uploadFile(thumbnail, "category");
     if (!thumbnailUrl) {
       return res
         .status(500)
         .json(new ApiResponse(500, null, "Error uploading thumbnail"));
     }
-    // delete thumbnail from cloudinary
+
+    // Delete old thumbnail from cloudinary if it exists
     if (category.thumbnail) {
       await deleteFile(category.thumbnail, "eshop/category", res);
     }
+
     category.thumbnail = thumbnailUrl;
     hasUpdates = true;
   }
 
+  // Update name if provided and different
   if (value.name !== undefined && value.name !== category.name) {
     category.name = value.name;
     hasUpdates = true;
   }
+
+  // Update isPublic if provided and different
   if (value.isPublic !== undefined && value.isPublic !== category.isPublic) {
     category.isPublic = value.isPublic;
     hasUpdates = true;
   }
-  if (
-    value.subCategories !== undefined &&
-    JSON.stringify(value.subCategories) !==
-      JSON.stringify(category.subCategories)
-  ) {
+
+  // Update subCategories if provided and different
+  if (value.subCategories !== undefined) {
+    // Deep comparison not possible with stringify due to potential _id fields
+    // Instead, we'll set it and mark as updated
     category.subCategories = value.subCategories;
     hasUpdates = true;
   }
@@ -205,11 +219,49 @@ const updateCategory = asyncHandler(async (req, res) => {
   if (!hasUpdates) {
     return res.status(400).json(new ApiResponse(400, null, "No updates found"));
   }
+
+  // Save the updated category
   await category.save({ validateBeforeSave: false });
+
+  // Return updated category
+  const updatedCategory = await Category.findById(category._id);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Category updated successfully."));
+    .json(
+      new ApiResponse(
+        200,
+        updatedCategory,
+        `${category.name} updated successfully`
+      )
+    );
+});
+
+const deleteSubCategory = asyncHandler(async (req, res) => {
+  const { categoryId, subCategoryId } = req.params;
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Category not found"));
+  }
+  const subCategory = category.subCategories.find(
+    (sub) => sub._id.toString() === subCategoryId
+  );
+  if (!subCategory) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "SubCategory not found"));
+  }
+  category.subCategories = category.subCategories.filter(
+    (sub) => sub._id.toString() !== subCategoryId
+  );
+  await category.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, null, `${subCategory.name} deleted successfully`)
+    );
 });
 
 export {
@@ -218,4 +270,5 @@ export {
   getAllCategories,
   deleteCategory,
   updateCategory,
+  deleteSubCategory,
 };

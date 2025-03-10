@@ -99,6 +99,65 @@ export const fetchGetCategory = createAsyncThunk(
   }
 );
 
+export const fetchUpdateCategory = createAsyncThunk(
+  "category/update",
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.patch(
+        `${baseUrl}/api/v1/category/update`,
+        formData,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "An unknown error occurred while updating category";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const fetchDeleteSubCategory = createAsyncThunk(
+  "category/deleteSubCategory",
+  async (
+    {
+      categoryId,
+      subCategoryId,
+    }: { categoryId: string; subCategoryId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.delete(
+        `${baseUrl}/api/v1/category/sub/${categoryId}/${subCategoryId}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "An unknown error occurred while deleting subcategory";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const categorySlice = createSlice({
   name: "category",
   initialState: {
@@ -113,6 +172,14 @@ const categorySlice = createSlice({
     getCategory: { data: {} as Category },
     getCategoryStatus: "idle",
     getCategoryError: {},
+
+    updateCategory: {},
+    updateCategoryStatus: "idle",
+    updateCategoryError: {},
+
+    deleteSubCategory: {},
+    deleteSubCategoryStatus: "idle",
+    deleteSubCategoryError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -154,6 +221,32 @@ const categorySlice = createSlice({
       .addCase(fetchGetCategory.rejected, (state, action) => {
         state.getCategoryStatus = "failed";
         state.getCategoryError = action.error;
+      })
+
+      // update category
+      .addCase(fetchUpdateCategory.pending, (state) => {
+        state.updateCategoryStatus = "loading";
+      })
+      .addCase(fetchUpdateCategory.fulfilled, (state, action) => {
+        state.updateCategoryStatus = "succeeded";
+        state.updateCategory = action.payload;
+      })
+      .addCase(fetchUpdateCategory.rejected, (state, action) => {
+        state.updateCategoryStatus = "failed";
+        state.updateCategoryError = action.error;
+      })
+
+      // delete subcategory
+      .addCase(fetchDeleteSubCategory.pending, (state) => {
+        state.deleteSubCategoryStatus = "loading";
+      })
+      .addCase(fetchDeleteSubCategory.fulfilled, (state, action) => {
+        state.deleteSubCategoryStatus = "succeeded";
+        state.deleteSubCategory = action.payload;
+      })
+      .addCase(fetchDeleteSubCategory.rejected, (state, action) => {
+        state.deleteSubCategoryStatus = "failed";
+        state.deleteSubCategoryError = action.error;
       });
   },
 });
