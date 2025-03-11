@@ -19,6 +19,7 @@ import SessionExpiredPage from "./pages/SessionExpiredPage";
 // import protected pages
 import ProductPage from "./pages/protected/ProductPage";
 import CartPage from "./pages/protected/CartPage";
+import ProfilePage from "./pages/protected/ProfilePage";
 
 // import admin pages
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
         <Route index element={<HomePage />} />
         <Route path="/product/:productId" element={<ProductPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>

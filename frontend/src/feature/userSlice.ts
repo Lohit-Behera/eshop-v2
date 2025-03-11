@@ -10,6 +10,7 @@ interface UserDetails {
   avatar: string;
   role: string;
   isVerified: boolean;
+  phone?: string;
 }
 
 export const fetchUserDetails = createAsyncThunk(

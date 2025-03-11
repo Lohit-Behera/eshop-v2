@@ -50,7 +50,7 @@ function Header() {
                       Admin
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
                     <User2 className="mr-2" />
                     Profile
                   </DropdownMenuItem>
