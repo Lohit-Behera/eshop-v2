@@ -125,4 +125,62 @@ const getCart = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, cart[0], "Cart found successfully"));
 });
 
-export { addToCart, getCart };
+const removeFromCart = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id);
+  const cart = await Cart.findOne({ user: user?._id });
+  const { productId } = req.params;
+  if (!cart) {
+    return res.status(404).json(new ApiResponse(404, null, "Cart not found"));
+  }
+  const product = await Product.findById(productId).select("name");
+  const productIndex = cart.products.findIndex(
+    (item: any) => item.product.toString() === productId
+  );
+  if (productIndex === -1) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Product not found in cart"));
+  }
+  cart.products.splice(productIndex, 1);
+  await cart.save();
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        null,
+        `${product?.name.slice(0, 20)}... removed from cart successfully`
+      )
+    );
+});
+
+const changeQuantity = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id);
+  const cart = await Cart.findOne({ user: user?._id });
+  const { quantity, productId } = req.body;
+  const product = await Product.findById(productId).select("name");
+  if (!cart) {
+    return res.status(404).json(new ApiResponse(404, null, "Cart not found"));
+  }
+  const productIndex = cart.products.findIndex(
+    (item: any) => item.product.toString() === productId
+  );
+  if (productIndex === -1) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Product not found in cart"));
+  }
+  cart.products[productIndex].quantity = quantity;
+  await cart.save();
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        null,
+        `${product?.name.slice(0, 20)}... quantity changed successfully`
+      )
+    );
+});
+
+export { addToCart, getCart, removeFromCart, changeQuantity };

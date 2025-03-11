@@ -74,6 +74,62 @@ export const fetchGetCart = createAsyncThunk(
   }
 );
 
+export const fetchRemoveFromCart = createAsyncThunk(
+  "cart/removeFromCart",
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.delete(
+        `${baseUrl}/api/v1/cart/remove/${productId}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "An unknown error occurred while deleting subcategory";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const fetchChangeQuantity = createAsyncThunk(
+  "cart/changeQuantity",
+  async (
+    { productId, quantity }: { productId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.patch(
+        `${baseUrl}/api/v1/cart/update`,
+        { productId, quantity },
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "An unknown error occurred while deleting subcategory";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
@@ -84,6 +140,14 @@ const cartSlice = createSlice({
     getCart: { data: { products: [] as Product[] } as Cart },
     getCartStatus: "idle",
     getCartError: {},
+
+    removeFromCart: {},
+    removeFromCartStatus: "idle",
+    removeFromCartError: {},
+
+    changeQuantity: {},
+    changeQuantityStatus: "idle",
+    changeQuantityError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -113,6 +177,34 @@ const cartSlice = createSlice({
         state.getCartStatus = "failed";
         state.getCartError =
           action.payload || "Something went wrong while getting cart";
+      })
+
+      // remove from cart
+      .addCase(fetchRemoveFromCart.pending, (state) => {
+        state.removeFromCartStatus = "loading";
+      })
+      .addCase(fetchRemoveFromCart.fulfilled, (state, action) => {
+        state.removeFromCart = action.payload;
+        state.removeFromCartStatus = "succeeded";
+      })
+      .addCase(fetchRemoveFromCart.rejected, (state, action) => {
+        state.removeFromCartStatus = "failed";
+        state.removeFromCartError =
+          action.payload || "Something went wrong while removing from cart";
+      })
+
+      // change quantity
+      .addCase(fetchChangeQuantity.pending, (state) => {
+        state.changeQuantityStatus = "loading";
+      })
+      .addCase(fetchChangeQuantity.fulfilled, (state, action) => {
+        state.changeQuantity = action.payload;
+        state.changeQuantityStatus = "succeeded";
+      })
+      .addCase(fetchChangeQuantity.rejected, (state, action) => {
+        state.changeQuantityStatus = "failed";
+        state.changeQuantityError =
+          action.payload || "Something went wrong while changing quantity";
       });
   },
 });
