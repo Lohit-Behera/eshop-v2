@@ -21,6 +21,7 @@ import userRouter from "./routes/user.routes";
 import categoryRouter from "./routes/category.routes";
 import productRouter from "./routes/product.routes";
 import reviewRouter from "./routes/review.routes";
+import cartRouter from "./routes/cart.routes";
 
 // Routes
 app.use("/api/v1/auth", authRouter);
@@ -28,5 +29,6 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/review", reviewRouter);
+app.use("/api/v1/cart", cartRouter);
 
 export { app };

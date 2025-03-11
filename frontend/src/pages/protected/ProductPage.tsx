@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchProduct } from "@/feature/productSlice";
-import { useAsyncDispatch } from "@/hooks/dispatch";
+import { useAsyncDispatch, useDispatchWithToast } from "@/hooks/dispatch";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { motion } from "motion/react";
-import { MinusIcon, PlusIcon, ShoppingCartIcon } from "lucide-react";
+import { Loader2, MinusIcon, PlusIcon, ShoppingCartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,12 +20,15 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Reviews from "@/components/Reviews";
+import { fetchAddToCart } from "@/feature/cartSlice";
+import { TextMorph } from "@/components/ui/text-morph";
 
 function ProductPage() {
   const { productId } = useParams();
   const [images, setImages] = useState<string[]>([]);
-
   const [index, setIndex] = useState(0);
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const product = useSelector((state: RootState) => state.product.product.data);
   const productStatus = useSelector(
     (state: RootState) => state.product.productStatus
@@ -48,6 +51,29 @@ function ProductPage() {
   const decreaseQuantity = () => setQuantity((prev) => Math.max(prev - 1, 1));
   const increaseQuantity = () =>
     setQuantity((prev) => Math.min(prev + 1, product.quantity));
+
+  const addToCart = useDispatchWithToast(fetchAddToCart, {
+    loadingMessage: "Adding to cart...",
+    getSuccessMessage(data) {
+      return data.message || `${product.name} added to cart successfully"`;
+    },
+    getErrorMessage(error) {
+      return (
+        error.message || error || "Something went wrong while adding to cart"
+      );
+    },
+    onSuccess: () => {
+      setButtonLoading(false);
+    },
+    onError: () => {
+      setButtonLoading(false);
+    },
+  });
+
+  const handleAddToCart = () => {
+    setButtonLoading(true);
+    addToCart({ productId: product._id, quantity });
+  };
 
   return (
     <>
@@ -176,8 +202,15 @@ function ProductPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
               >
-                <Button className="w-full mb-4">
-                  <ShoppingCartIcon className="mr-2 h-4 w-4" /> Add to Cart
+                <Button className="w-full mb-4" onClick={handleAddToCart}>
+                  {buttonLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShoppingCartIcon className="h-4 w-4" />
+                  )}
+                  <TextMorph>
+                    {buttonLoading ? "Adding..." : "Add to Cart"}
+                  </TextMorph>
                 </Button>
               </motion.div>
 
