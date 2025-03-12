@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CreditCard,
+  Loader2,
   LogOut,
   MapPin,
   Package,
+  Plus,
   Settings,
   ShoppingBag,
   User2,
@@ -28,6 +30,73 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useAsyncDispatch, useDispatchWithToast } from "@/hooks/dispatch";
+import {
+  Address,
+  fetchAllAddresses,
+  fetchCreateAddress,
+  fetchUpdateAddress,
+} from "@/feature/addressSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { GlowInput } from "@/components/ui/glow-input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TextMorph } from "@/components/ui/text-morph";
+
+const addressSchema = z.object({
+  name: z
+    .string()
+    .min(3, { message: "Name must be at least 3 characters" })
+    .max(50, { message: "Name must be at most 50 characters" }),
+  type: z
+    .string()
+    .min(3, { message: "Type must be at least 3 characters" })
+    .max(50, { message: "Type must be at most 50 characters" }),
+  addressLine1: z
+    .string()
+    .min(3, { message: "Address line 1 must be at least 3 characters" })
+    .max(50, { message: "Address line 1 must be at most 50 characters" }),
+  addressLine2: z.string().optional(),
+  city: z
+    .string()
+    .min(3, { message: "City must be at least 3 characters" })
+    .max(50, { message: "City must be at most 50 characters" }),
+  state: z
+    .string()
+    .min(3, { message: "State must be at least 3 characters" })
+    .max(50, { message: "State must be at most 50 characters" }),
+  country: z
+    .string()
+    .min(3, { message: "Country must be at least 3 characters" })
+    .max(50, { message: "Country must be at most 50 characters" }),
+  pinCode: z
+    .string()
+    .min(3, { message: "Pin code must be at least 3 characters" })
+    .max(50, { message: "Pin code must be at most 50 characters" }),
+  phone: z
+    .string()
+    .min(3, { message: "Phone number must be at least 3 characters" })
+    .max(50, { message: "Phone number must be at most 50 characters" }),
+  isDefault: z.boolean(),
+});
 
 export default function ProfilePage() {
   const userDetails = useSelector((state: RootState) => state.user.userDetails);
@@ -37,6 +106,108 @@ export default function ProfilePage() {
     email: userDetails?.email || "",
     phone: userDetails?.phone || "",
   });
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [action, setAction] = useState({
+    add: false,
+    update: false,
+  });
+  const [addressToUpdate, setAddressToUpdate] = useState<Address>();
+  const [loading, setLoading] = useState({
+    addButton: false,
+    updateButton: false,
+  });
+
+  const addresses = useSelector(
+    (state: RootState) => state.address.allAddresses.data
+  );
+  const form = useForm<z.infer<typeof addressSchema>>({
+    resolver: zodResolver(addressSchema),
+    defaultValues: {
+      name: "",
+      type: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      country: "",
+      pinCode: "",
+      phone: "",
+      isDefault: false,
+    },
+  });
+
+  const allAddress = useAsyncDispatch(fetchAllAddresses);
+
+  useEffect(() => {
+    allAddress();
+  }, []);
+  const createAddress = useDispatchWithToast(fetchCreateAddress, {
+    loadingMessage: "Adding Address...",
+    getSuccessMessage(data) {
+      return data.message || "Address added successful";
+    },
+    getErrorMessage(error) {
+      return error.message || error || "Failed to add address.";
+    },
+    onSuccess() {
+      allAddress();
+      setDialogOpen(false);
+      setLoading((prev) => ({ ...prev, addButton: false }));
+    },
+    onError() {
+      setLoading((prev) => ({ ...prev, addButton: false }));
+    },
+  });
+
+  const updateAddress = useDispatchWithToast(fetchUpdateAddress, {
+    loadingMessage: "Updating Address...",
+    getSuccessMessage(data) {
+      return data.message || "Address updated successful";
+    },
+    getErrorMessage(error) {
+      return error.message || error || "Failed to update address.";
+    },
+    onSuccess() {
+      allAddress();
+      setDialogOpen(false);
+      setLoading((prev) => ({ ...prev, updateButton: false }));
+    },
+    onError() {
+      setLoading((prev) => ({ ...prev, updateButton: false }));
+    },
+  });
+
+  const submitAddress = (data: z.infer<typeof addressSchema>) => {
+    if (action.add) {
+      setLoading((prev) => ({ ...prev, addButton: true }));
+      createAddress(data);
+    } else if (action.update) {
+      setLoading((prev) => ({ ...prev, updateButton: true }));
+      updateAddress({
+        ...data,
+        addressId: addressToUpdate?._id ? addressToUpdate._id : "",
+      });
+    }
+  };
+
+  const handelAddressToUpdate = (address: Address) => {
+    setAction((prev) => ({ ...prev, update: true }));
+    setAddressToUpdate(address);
+    form.reset({
+      name: address.name,
+      type: address.type,
+      addressLine1: address.addressLine1,
+      addressLine2: address.addressLine2,
+      city: address.city,
+      state: address.state,
+      country: address.country,
+      pinCode: address.pinCode,
+      phone: address.phone,
+      isDefault: address.isDefault,
+    });
+    setDialogOpen(true);
+  };
 
   return (
     <div className="container mx-auto py-10 px-4 md:px-6 min-h-[calc(100vh-64px)]">
@@ -307,52 +478,69 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    {
-                      type: "Home",
-                      address: "123 Main St, Apt 4B, New York, NY 10001",
-                    },
-                    {
-                      type: "Work",
-                      address:
-                        "456 Business Ave, Suite 200, New York, NY 10002",
-                    },
-                  ].map((address, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="border rounded-lg p-4"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium">{address.type}</h3>
-                            {index === 0 && (
-                              <Badge variant="outline">Default</Badge>
-                            )}
+                  {addresses.length === 0 ? (
+                    <p>No addresses found Create a new address</p>
+                  ) : (
+                    <>
+                      {addresses.map((address, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">{address.type}</h3>
+                                {address.isDefault && (
+                                  <Badge variant="outline">Default</Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                                {address.addressLine1}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handelAddressToUpdate(address)}
+                              >
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {address.address}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                        </motion.div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button>Add New Address</Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setDialogOpen(true);
+                    setAction((prev) => ({ ...prev, add: true }));
+                    form.reset({
+                      name: "",
+                      type: "",
+                      addressLine1: "",
+                      addressLine2: "",
+                      city: "",
+                      state: "",
+                      country: "",
+                      pinCode: "",
+                      phone: "",
+                      isDefault: false,
+                    });
+                  }}
+                >
+                  Add New Address
+                </Button>
               </CardFooter>
             </Card>
           )}
@@ -468,6 +656,207 @@ export default function ProfilePage() {
           )}
         </motion.div>
       </motion.div>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={() => {
+          setDialogOpen(false);
+          setAction({ add: false, update: false });
+        }}
+      >
+        <DialogContent
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+          className="w-full md:min-w-[700px]"
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {action.add ? "Add new address" : "Update address"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(submitAddress)}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Type" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="addressLine1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address Line 1</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Address Line 1" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="addressLine2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address Line 2</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Address Line 2" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="City" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="State" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Country" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pinCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pin Code</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Pin Code" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <GlowInput placeholder="Phone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="isDefault"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel>Default</FormLabel>
+                      <div className="flex space-x-3">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <p className="text-sm leading-none text-muted-foreground">
+                          If checked, this address will be default address.
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end w-full">
+                <Button type="submit" size="sm">
+                  {action.add ? (
+                    <>
+                      {loading.addButton ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      <TextMorph>
+                        {loading.addButton ? "Adding..." : "Add"}
+                      </TextMorph>
+                    </>
+                  ) : (
+                    <>
+                      {loading.updateButton ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      <TextMorph>
+                        {loading.updateButton ? "Updating..." : "Update"}
+                      </TextMorph>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

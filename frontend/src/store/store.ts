@@ -5,6 +5,7 @@ import categorySlice from "@/feature/categorySlice";
 import productSlice from "@/feature/productSlice";
 import reviewSlice from "@/feature/reviewSlice";
 import cartSlice from "@/feature/cartSlice";
+import addressSlice from "@/feature/addressSlice";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     product: productSlice,
     review: reviewSlice,
     cart: cartSlice,
+    address: addressSlice,
   },
 });
 

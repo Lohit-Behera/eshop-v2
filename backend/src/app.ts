@@ -22,6 +22,7 @@ import categoryRouter from "./routes/category.routes";
 import productRouter from "./routes/product.routes";
 import reviewRouter from "./routes/review.routes";
 import cartRouter from "./routes/cart.routes";
+import addressRouter from "./routes/address.routes";
 
 // Routes
 app.use("/api/v1/auth", authRouter);
@@ -30,5 +31,6 @@ app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/address", addressRouter);
 
 export { app };

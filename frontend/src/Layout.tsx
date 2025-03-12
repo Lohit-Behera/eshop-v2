@@ -6,12 +6,14 @@ import { useLayoutEffect } from "react";
 import { fetchUserDetails } from "./feature/userSlice";
 import { fetchAllCategories } from "./feature/categorySlice";
 import { useAsyncDispatch } from "./hooks/dispatch";
+import { fetchAllAddresses } from "./feature/addressSlice";
 
 function Layout() {
   const location = useLocation();
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
   const fetchDetails = useAsyncDispatch(fetchUserDetails);
   const fetchCategories = useAsyncDispatch(fetchAllCategories);
+  const fetchAddresses = useAsyncDispatch(fetchAllAddresses);
   const userDetailsStatus = useSelector(
     (state: RootState) => state.user.userDetailsStatus
   );
@@ -22,6 +24,7 @@ function Layout() {
   useLayoutEffect(() => {
     if (userInfo) {
       fetchDetails();
+      fetchAddresses();
     }
   }, [userInfo]);
 
