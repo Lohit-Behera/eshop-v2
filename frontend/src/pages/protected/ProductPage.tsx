@@ -38,6 +38,11 @@ function ProductPage() {
   useEffect(() => {
     if (productId) getProduct(productId);
   }, [productId]);
+  useEffect(() => {
+    if (productStatus === "succeeded" && product.name) {
+      document.title = product.name;
+    }
+  }, [productStatus, product]);
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {

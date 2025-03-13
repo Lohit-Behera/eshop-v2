@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { baseUrl } from "@/lib/proxy";
 
-interface Product {
+export interface Product {
   productId: string;
   name: string;
   thumbnail: string;

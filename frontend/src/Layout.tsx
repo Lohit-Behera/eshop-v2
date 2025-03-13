@@ -7,6 +7,7 @@ import { fetchUserDetails } from "./feature/userSlice";
 import { fetchAllCategories } from "./feature/categorySlice";
 import { useAsyncDispatch } from "./hooks/dispatch";
 import { fetchAllAddresses } from "./feature/addressSlice";
+import { fetchGetCart } from "./feature/cartSlice";
 
 function Layout() {
   const location = useLocation();
@@ -14,17 +15,18 @@ function Layout() {
   const fetchDetails = useAsyncDispatch(fetchUserDetails);
   const fetchCategories = useAsyncDispatch(fetchAllCategories);
   const fetchAddresses = useAsyncDispatch(fetchAllAddresses);
+  const fetchCart = useAsyncDispatch(fetchGetCart);
   const userDetailsStatus = useSelector(
     (state: RootState) => state.user.userDetailsStatus
   );
   const getAllCategoriesStatus = useSelector(
     (state: RootState) => state.category.getAllCategoriesStatus
   );
-
   useLayoutEffect(() => {
     if (userInfo) {
       fetchDetails();
       fetchAddresses();
+      fetchCart();
     }
   }, [userInfo]);
 

@@ -20,6 +20,7 @@ import SessionExpiredPage from "./pages/SessionExpiredPage";
 import ProductPage from "./pages/protected/ProductPage";
 import CartPage from "./pages/protected/CartPage";
 import ProfilePage from "./pages/protected/ProfilePage";
+import CheckoutPage from "./pages/protected/CheckoutPage";
 
 // import admin pages
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -37,6 +38,7 @@ const router = createBrowserRouter(
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/verify/:token" element={<VerifyPage />} />
       <Route path="/session-expired" element={<SessionExpiredPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
       {/* protected routes */}
       <Route path="/" element={<ProtectedLayout />}>
         <Route index element={<HomePage />} />

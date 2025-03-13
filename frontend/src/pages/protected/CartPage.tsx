@@ -338,9 +338,11 @@ function CartPage() {
               </CardContent>
               <CardFooter className="p-4 md:p-6 pt-0">
                 <div className="w-full space-y-4">
-                  <Button className="w-full">
-                    Proceed to Checkout
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button className="w-full" asChild>
+                    <Link to="/checkout">
+                      Proceed to Checkout
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
                 </div>
               </CardFooter>
