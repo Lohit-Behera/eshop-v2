@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, NavLink } from "react-router-dom";
 import { ModeToggle } from "./mode-toggle";
 import Logo from "@/assets/Logo.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,12 +17,22 @@ import {
   LayoutGrid,
   LogIn,
   Package2,
+  PanelLeft,
   Settings2,
   ShoppingCart,
   User2,
   UserRoundCog,
 } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "./ui/button";
 
 function Header() {
   const userDetails = useSelector((state: RootState) => state.user.userDetails);
@@ -33,7 +43,7 @@ function Header() {
     {
       label: "Home",
       icon: (
-        <span className="flex px-2 py-0 justify-center items-center gap-1 text-sm font-semibold">
+        <span className="flex px-0 md:px-3 py-0 md:py-1 justify-center items-center gap-2 text-sm font-semibold">
           <Home className="h-5 w-5" /> Home
         </span>
       ),
@@ -42,7 +52,7 @@ function Header() {
     {
       label: "Products",
       icon: (
-        <span className="flex px-3 py-1 justify-center items-center gap-2 text-sm font-semibold">
+        <span className="flex px-0 md:px-3 py-0 md:py-1 justify-center items-center gap-2 text-sm font-semibold">
           <Package2 className="h-5 w-5" /> Products
         </span>
       ),
@@ -51,7 +61,7 @@ function Header() {
     {
       label: "Category",
       icon: (
-        <span className="flex px-3 py-1 justify-center items-center gap-2 text-sm font-semibold">
+        <span className="flex px-0 md:px-3 py-0 md:py-1 justify-center items-center gap-2 text-sm font-semibold">
           <LayoutGrid className="h-5 w-5" /> Category
         </span>
       ),
@@ -60,7 +70,7 @@ function Header() {
     {
       label: "Cart",
       icon: (
-        <span className="flex px-3 py-1 justify-center items-center gap-2 text-sm font-semibold">
+        <span className="flex px-0 md:px-3 py-0 md:py-1 justify-center items-center gap-2 text-sm font-semibold">
           <ShoppingCart className="h-5 w-5" /> Cart
         </span>
       ),
@@ -71,34 +81,73 @@ function Header() {
     <>
       <header className="z-20 w-full sticky top-0 p-2 backdrop-blur bg-background/50">
         <nav className="flex justify-between space-x-1">
-          <Link to={"/"}>
+          <Link to={"/"} className="hidden md:block">
             <img src={Logo} alt="logo" className="w-10 h-10" />
           </Link>
+          <Sheet>
+            <SheetTrigger className="flex md:hidden" asChild>
+              <Button variant="outline" size="icon">
+                <PanelLeft />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[180px]">
+              <SheetHeader>
+                <SheetTitle>
+                  <Link
+                    to={"/"}
+                    className="flex gap-2 justify-start items-center"
+                  >
+                    <img src={Logo} alt="logo" className="w-10 h-10" /> EShop
+                  </Link>
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col space-y-2 mt-8">
+                {TABS.map((tab) => (
+                  <SheetClose key={tab.label} asChild>
+                    <NavLink to={tab.link}>
+                      {({ isActive }) => (
+                        <Button
+                          variant={isActive ? "default" : "ghost"}
+                          size={"sm"}
+                          className="w-full"
+                        >
+                          {tab.icon}
+                        </Button>
+                      )}
+                    </NavLink>
+                  </SheetClose>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+
           <div className="flex space-x-2">
-            <AnimatedBackground
-              defaultValue={
-                TABS.find((tab) => tab.link === location.pathname)?.label
-              }
-              className="rounded-lg bg-muted flex"
-              transition={{
-                type: "spring",
-                bounce: 0.2,
-                duration: 0.3,
-              }}
-            >
-              {TABS.map((tab) => (
-                <Link
-                  key={tab.label}
-                  to={tab.link}
-                  data-id={tab.label}
-                  type="button"
-                  className="flex items-center justify-center text-zinc-500 transition-colors duration-100 focus-visible:outline-2 data-[checked=true]:text-foreground"
-                  onClick={() => navigate(tab.link)}
-                >
-                  {tab.icon}
-                </Link>
-              ))}
-            </AnimatedBackground>
+            <div className="hidden md:flex space-x-2">
+              <AnimatedBackground
+                defaultValue={
+                  TABS.find((tab) => tab.link === location.pathname)?.label
+                }
+                className="rounded-lg bg-muted "
+                transition={{
+                  type: "spring",
+                  bounce: 0.2,
+                  duration: 0.3,
+                }}
+              >
+                {TABS.map((tab) => (
+                  <Link
+                    key={tab.label}
+                    to={tab.link}
+                    data-id={tab.label}
+                    type="button"
+                    className="flex items-center justify-center text-zinc-500 transition-colors duration-100 focus-visible:outline-2 data-[checked=true]:text-foreground"
+                    onClick={() => navigate(tab.link)}
+                  >
+                    {tab.icon}
+                  </Link>
+                ))}
+              </AnimatedBackground>
+            </div>
             {userInfo && (
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
@@ -137,7 +186,6 @@ function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <ModeToggle />
           </div>
         </nav>
       </header>
