@@ -10,7 +10,10 @@ import { Address } from "@/feature/addressSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Product } from "@/feature/cartSlice";
-
+import { razorpayPayment } from "@/components/payments/razorpay";
+import { useDispatchWithToast } from "@/hooks/dispatch";
+import { fetchRazorpayOrderPlaced } from "@/feature/orderSlice";
+import { useNavigate } from "react-router-dom";
 // Types for our checkout data
 export type CheckoutData = {
   products: Product[];
@@ -26,12 +29,14 @@ export type Payment = {
 };
 
 export default function CheckoutFlow() {
+  const navigate = useNavigate();
   const cart = useSelector((state: RootState) => state.cart.getCart.data);
+  const userDetails = useSelector((state: RootState) => state.user.userDetails);
   const [step, setStep] = useState(0);
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     products: cart.products,
     address: null,
-    payment: { method: "razorpay" } as Payment | null,
+    payment: { method: "razorpay" } as Payment,
     shippingPrice: cart.shippingPrice || 0,
     tax: cart.tax || 0,
     totalPrice: cart.totalPrice || 0,
@@ -87,11 +92,47 @@ export default function CheckoutFlow() {
     if (step === 2 && !checkoutData.payment) return true;
     return false;
   };
-
+  const fetchOrderPlaced = useDispatchWithToast(fetchRazorpayOrderPlaced, {
+    loadingMessage: "Placing order...",
+    getSuccessMessage(data) {
+      return data.message || `Order placed successfully`;
+    },
+    getErrorMessage(error) {
+      return (
+        error?.message || error || "Something went wrong while placing order"
+      );
+    },
+    onSuccess: (data) => {
+      // Redirect to order page
+      navigate(`/order/${data.data}`);
+    },
+  });
   const handlePlaceOrder = () => {
-    // Here you would dispatch an action to your Redux store to create the order
-    alert("Order placed successfully!");
     // Redirect to order confirmation page or dashboard
+    if (
+      checkoutData.payment &&
+      checkoutData.payment.method === "razorpay" &&
+      userDetails
+    ) {
+      razorpayPayment(
+        cart.totalPrice + cart.shippingPrice + cart.tax,
+        userDetails,
+        {
+          _id: checkoutData.address?._id,
+          name: checkoutData.address?.name,
+          type: checkoutData.address?.type,
+          addressLine1: checkoutData.address?.addressLine1,
+          addressLine2: checkoutData.address?.addressLine2,
+          city: checkoutData.address?.city,
+          state: checkoutData.address?.state,
+          country: checkoutData.address?.country,
+          pinCode: checkoutData.address?.pinCode,
+          phone: checkoutData.address?.phone,
+        },
+        cart,
+        fetchOrderPlaced
+      );
+    }
   };
 
   return (

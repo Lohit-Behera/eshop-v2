@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import { baseUrl } from "@/lib/proxy";
 
 // type
-interface UserDetails {
+export interface UserDetails {
   _id: string;
   fullName: string;
   email: string;
