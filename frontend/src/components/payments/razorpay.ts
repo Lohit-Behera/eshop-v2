@@ -29,7 +29,7 @@ export const razorpayPayment = async (
 
   try {
     const { data } = await axios.post(
-      "http://localhost:8000/api/v1/order/initialize",
+      "http://localhost:8000/api/v1/order/initialize/razorpay",
       {
         amount: Math.round(amount),
         currency: "INR",

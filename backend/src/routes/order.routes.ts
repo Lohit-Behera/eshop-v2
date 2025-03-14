@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  orderInitialize,
+  orderInitializeRazorpay,
   orderPlacedRazorpay,
   getOrder,
 } from "../controllers/orderController";
@@ -8,7 +8,11 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const orderRouter = Router();
 
-orderRouter.post("/initialize", authMiddleware, orderInitialize);
+orderRouter.post(
+  "/initialize/razorpay",
+  authMiddleware,
+  orderInitializeRazorpay
+);
 orderRouter.post("/placed/razorpay", authMiddleware, orderPlacedRazorpay);
 orderRouter.get("/get/:orderId", authMiddleware, getOrder);
 

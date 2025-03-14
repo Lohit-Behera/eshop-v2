@@ -7,7 +7,7 @@ import { Order } from "../models/orderModel";
 import { Product } from "../models/productModel";
 import { Cart } from "../models/cartModel";
 
-const orderInitialize = asyncHandler(async (req, res) => {
+const orderInitializeRazorpay = asyncHandler(async (req, res) => {
   const { amount, cart, address } = req.body;
 
   if (!cart || !cart.products || cart.products.length === 0) {
@@ -129,4 +129,4 @@ const getOrder = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, order, "Order found"));
 });
 
-export { orderInitialize, orderPlacedRazorpay, getOrder };
+export { orderInitializeRazorpay, orderPlacedRazorpay, getOrder };

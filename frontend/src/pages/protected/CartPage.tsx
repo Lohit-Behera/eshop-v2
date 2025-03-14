@@ -29,7 +29,12 @@ function CartPage() {
     removeFromCart: false,
     changeQuantity: false,
   });
-  const cart = useSelector((state: RootState) => state.cart.getCart.data);
+  const cart = useSelector((state: RootState) => state.cart.getCart.data) || {
+    products: [],
+    totalPrice: 0,
+    shippingPrice: 0,
+    tax: 0,
+  };
   const getCart = useAsyncDispatch(fetchGetCart);
   useEffect(() => {
     getCart();
