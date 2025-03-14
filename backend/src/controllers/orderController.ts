@@ -107,7 +107,7 @@ const orderPlacedRazorpay = asyncHandler(async (req, res) => {
     cart.products.map(async (item) => {
       const product = await Product.findById(item.product);
       if (product) {
-        product.quantity -= item.quantity;
+        product.stock -= item.quantity;
         await product.save();
       }
     })

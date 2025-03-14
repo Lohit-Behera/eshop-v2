@@ -6,7 +6,7 @@ export interface IProduct {
   originalPrice: number;
   sellingPrice: number;
   discount: number;
-  quantity: number;
+  stock: number;
   category: string;
   subCategory: string;
   brand: string;
@@ -17,7 +17,7 @@ export interface IProduct {
   isPublic: boolean;
 }
 
-const productSchema = new Schema(
+const productSchema = new Schema<IProduct>(
   {
     name: {
       type: String,
@@ -35,7 +35,7 @@ const productSchema = new Schema(
       type: Number,
       required: true,
     },
-    quantity: {
+    stock: {
       type: Number,
       required: true,
     },

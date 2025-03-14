@@ -45,7 +45,7 @@ const updateProductSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
   originalPrice: z.number().min(1, { message: "Price must be at least 1" }),
   sellingPrice: z.number().min(1, { message: "Price must be at least 1" }),
-  quantity: z.number().min(1, { message: "Quantity must be at least 1" }),
+  stock: z.number().min(1, { message: "Stock must be at least 1" }),
   category: z.string(),
   subCategory: z.string(),
   brand: z.string(),
@@ -117,7 +117,7 @@ function AddProductPage() {
       name: "",
       originalPrice: undefined,
       sellingPrice: undefined,
-      quantity: undefined,
+      stock: undefined,
       category: "",
       subCategory: "",
       brand: "",
@@ -145,7 +145,7 @@ function AddProductPage() {
         name: product.name,
         originalPrice: product.originalPrice,
         sellingPrice: product.sellingPrice,
-        quantity: product.quantity,
+        stock: product.stock,
         category: product.category,
         brand: product.brand,
         productDetails: product.productDetails,
@@ -184,7 +184,7 @@ function AddProductPage() {
     formData.append("name", data.name);
     formData.append("originalPrice", data.originalPrice.toString());
     formData.append("sellingPrice", data.sellingPrice.toString());
-    formData.append("quantity", data.quantity.toString());
+    formData.append("stock", data.stock.toString());
     formData.append("category", data.category);
     formData.append("subCategory", data.subCategory);
     formData.append("brand", data.brand);
@@ -264,13 +264,13 @@ function AddProductPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="quantity"
+                  name="stock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel>Stock</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Quantity of Product"
+                          placeholder="Stock of Product"
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))

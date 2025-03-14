@@ -86,15 +86,14 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: "quantity",
+    accessorKey: "stock",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Quantity" />;
+      return <DataTableColumnHeader column={column} title="Stock" />;
     },
+
     cell: ({ row }) => {
       return (
-        <p className="flex justify-center text-center">
-          {row.original.quantity}
-        </p>
+        <p className="flex justify-center text-center">{row.original.stock}</p>
       );
     },
   },

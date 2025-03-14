@@ -156,13 +156,12 @@ function CartPage() {
                               size="icon"
                               className="h-8 w-8 rounded-none"
                               disabled={
-                                item.cartQuantity === 1 ||
-                                loading.changeQuantity
+                                item.quantity === 1 || loading.changeQuantity
                               }
                               onClick={() =>
                                 updateQuantity(
                                   item.productId,
-                                  item.cartQuantity - 1
+                                  item.quantity - 1
                                 )
                               }
                             >
@@ -174,19 +173,17 @@ function CartPage() {
                               <span className="sr-only">Decrease quantity</span>
                             </Button>
                             <span className="w-8 text-center">
-                              {item.cartQuantity}
+                              {item.quantity}
                             </span>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-none"
-                              disabled={
-                                item.cartQuantity === item.productQuantity
-                              }
+                              disabled={item.quantity === item.stock}
                               onClick={() =>
                                 updateQuantity(
                                   item.productId,
-                                  item.cartQuantity + 1
+                                  item.quantity + 1
                                 )
                               }
                             >

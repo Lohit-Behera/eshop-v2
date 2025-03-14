@@ -9,7 +9,7 @@ interface ProductFields {
   name?: string;
   originalPrice?: number;
   sellingPrice?: number;
-  quantity?: number;
+  stock?: number;
   discount?: number;
   category?: string;
   subCategory?: string;
@@ -26,7 +26,7 @@ const createProduct = asyncHandler(async (req, res) => {
     name: Joi.string().min(3).required(),
     originalPrice: Joi.number().required(),
     sellingPrice: Joi.number().required(),
-    quantity: Joi.number().required(),
+    stock: Joi.number().required(),
     discount: Joi.number().required(),
     category: Joi.string().required(),
     subCategory: Joi.string().required(),
@@ -47,7 +47,7 @@ const createProduct = asyncHandler(async (req, res) => {
     name,
     originalPrice,
     sellingPrice,
-    quantity,
+    stock,
     discount,
     category,
     subCategory,
@@ -96,7 +96,7 @@ const createProduct = asyncHandler(async (req, res) => {
     name,
     originalPrice,
     sellingPrice,
-    quantity,
+    stock,
     discount,
     category,
     subCategory,
@@ -150,7 +150,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     name: Joi.string().min(3).optional(),
     originalPrice: Joi.number().optional(),
     sellingPrice: Joi.number().optional(),
-    quantity: Joi.number().optional(),
+    stock: Joi.number().optional(),
     discount: Joi.number().optional(),
     category: Joi.string().optional(),
     subCategory: Joi.string().optional(),
@@ -179,7 +179,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     "name",
     "originalPrice",
     "sellingPrice",
-    "quantity",
+    "stock",
     "discount",
     "category",
     "subCategory",

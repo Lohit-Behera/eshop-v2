@@ -34,9 +34,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Review } from "@/feature/reviewSlice";
+import { format } from "date-fns";
 
 export default function Reviews({ productId }: { productId: string }) {
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
@@ -334,7 +334,7 @@ export default function Reviews({ productId }: { productId: string }) {
                         <h4 className="font-semibold">{review.name}</h4>
                         <div className="flex items-center gap-2">
                           <time className="text-sm text-muted-foreground">
-                            {review.createdAt}
+                            {format(review.createdAt, "PPP")}
                           </time>
                           {userInfo && userInfo._id === review.user && (
                             <DropdownMenu>

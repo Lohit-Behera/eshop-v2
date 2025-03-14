@@ -8,7 +8,7 @@ export interface Product {
   originalPrice: number;
   sellingPrice: number;
   discount: number;
-  quantity: number;
+  stock: number;
   category: string;
   subCategory: string;
   brand: string;

@@ -68,7 +68,7 @@ export default function OrderSummary({ checkoutData }: OrderSummaryProps) {
                 {product.name}
               </h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                Qty: {product.cartQuantity}
+                Qty: {product.quantity}
               </p>
             </div>
             <div className="text-right text-sm md:text-base mt-2 sm:mt-0 w-full sm:w-auto">

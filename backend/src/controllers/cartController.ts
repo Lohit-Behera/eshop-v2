@@ -26,6 +26,19 @@ const addToCart = asyncHandler(async (req, res) => {
       .status(404)
       .json(new ApiResponse(404, null, "Product not found"));
   }
+  // check stock availability
+  if (product.stock < value.quantity) {
+    return res
+      .status(400)
+      .json(
+        new ApiResponse(
+          400,
+          null,
+          `Only ${product.stock} ${product.name} available in stock`
+        )
+      );
+  }
+  // check if cart exists
   const cart = await Cart.findOne({ user: user?._id });
   if (!cart) {
     const newCart = await Cart.create({
@@ -92,8 +105,8 @@ const getCart = asyncHandler(async (req, res) => {
             name: "$productDetails.name",
             thumbnail: "$productDetails.thumbnail",
             sellingPrice: "$productDetails.sellingPrice",
-            productQuantity: "$productDetails.quantity", // Stock quantity
-            cartQuantity: "$products.quantity", // Quantity in the cart
+            stock: "$productDetails.stock", // Stock quantity
+            quantity: "$products.quantity", // Quantity in the cart
             totalPrice: "$products.totalPrice", // Total price per product
           },
         },
@@ -169,6 +182,18 @@ const changeQuantity = asyncHandler(async (req, res) => {
     return res
       .status(404)
       .json(new ApiResponse(404, null, "Product not found in cart"));
+  }
+  // check stock availability
+  if (product?.stock && quantity > product?.stock) {
+    return res
+      .status(400)
+      .json(
+        new ApiResponse(
+          400,
+          null,
+          `Only ${product?.stock} ${product?.name} available in stock`
+        )
+      );
   }
   cart.products[productIndex].quantity = quantity;
   await cart.save();

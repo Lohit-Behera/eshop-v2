@@ -55,7 +55,7 @@ function ProductPage() {
 
   const decreaseQuantity = () => setQuantity((prev) => Math.max(prev - 1, 1));
   const increaseQuantity = () =>
-    setQuantity((prev) => Math.min(prev + 1, product.quantity));
+    setQuantity((prev) => Math.min(prev + 1, product.stock));
 
   const addToCart = useDispatchWithToast(fetchAddToCart, {
     loadingMessage: "Adding to cart...",
@@ -166,6 +166,7 @@ function ProductPage() {
                     variant="outline"
                     size="icon"
                     onClick={decreaseQuantity}
+                    disabled={quantity === 1}
                     className="rounded-r-none"
                   >
                     <MinusIcon className="h-4 w-4" />
@@ -181,19 +182,20 @@ function ProductPage() {
                           1,
                           Math.min(
                             Number.parseInt(e.target.value) || 1,
-                            product.quantity
+                            product.stock
                           )
                         )
                       )
                     }
                     className="w-20 text-center rounded-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
                     min="1"
-                    max={product.quantity}
+                    max={product.stock}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
+                    disabled={quantity === product.stock}
                     onClick={increaseQuantity}
                     className="rounded-l-none"
                   >

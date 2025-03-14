@@ -7,8 +7,8 @@ export interface Product {
   name: string;
   thumbnail: string;
   sellingPrice: number;
-  productQuantity: number;
-  cartQuantity: number;
+  stock: number;
+  quantity: number;
   totalPrice: number;
 }
 interface Cart {
