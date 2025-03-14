@@ -121,4 +121,12 @@ const orderPlacedRazorpay = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, order._id, "Order placed successfully"));
 });
 
-export { orderInitialize, orderPlacedRazorpay };
+const getOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.orderId);
+  if (!order) {
+    return res.status(404).json(new ApiResponse(404, null, "Order not found"));
+  }
+  return res.status(200).json(new ApiResponse(200, order, "Order found"));
+});
+
+export { orderInitialize, orderPlacedRazorpay, getOrder };

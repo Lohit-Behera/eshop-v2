@@ -21,6 +21,7 @@ import ProductPage from "./pages/protected/ProductPage";
 import CartPage from "./pages/protected/CartPage";
 import ProfilePage from "./pages/protected/ProfilePage";
 import CheckoutPage from "./pages/protected/CheckoutPage";
+import OrderPage from "./pages/protected/OrderPage";
 
 // import admin pages
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -45,6 +46,7 @@ const router = createBrowserRouter(
         <Route path="/product/:productId" element={<ProductPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/order/:orderId" element={<OrderPage />} />
       </Route>
       {/* admin routes */}
       <Route path="/admin" element={<AdminLayout />}>
