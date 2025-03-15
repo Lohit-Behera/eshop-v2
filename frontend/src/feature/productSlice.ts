@@ -22,6 +22,20 @@ export interface Product {
   __v: number;
 }
 
+export interface HomeProduct {
+  _id: string;
+  name: string;
+  originalPrice: number;
+  sellingPrice: number;
+  discount: number;
+  stock: number;
+  category: string;
+  subCategory: string;
+  brand: string;
+  isPublic: boolean;
+  thumbnail: string;
+}
+
 export const fetchCreateProduct = createAsyncThunk(
   "product/createProduct",
   async (product: FormData, { rejectWithValue }) => {
@@ -151,6 +165,32 @@ export const fetchDeleteProduct = createAsyncThunk(
   }
 );
 
+export const fetchHomeProducts = createAsyncThunk(
+  "product/homeProducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.get(
+        `${baseUrl}/api/v1/product/get/home`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting all the products";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState: {
@@ -173,6 +213,10 @@ const productSlice = createSlice({
     deleteProduct: {},
     deleteProductStatus: "idle",
     deleteProductError: {},
+
+    homeProducts: { data: [] as HomeProduct[] },
+    homeProductsStatus: "idle",
+    homeProductsError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -242,6 +286,21 @@ const productSlice = createSlice({
         state.deleteProductStatus = "failed";
         state.deleteProductError =
           action.payload || "Something went wrong while deleting the product";
+      })
+
+      // home products
+      .addCase(fetchHomeProducts.pending, (state) => {
+        state.homeProductsStatus = "loading";
+      })
+      .addCase(fetchHomeProducts.fulfilled, (state, action) => {
+        state.homeProductsStatus = "succeeded";
+        state.homeProducts = action.payload;
+      })
+      .addCase(fetchHomeProducts.rejected, (state, action) => {
+        state.homeProductsStatus = "failed";
+        state.homeProductsError =
+          action.payload ||
+          "Something went wrong while getting all the products";
       });
   },
 });

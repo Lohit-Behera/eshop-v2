@@ -48,13 +48,36 @@ const addToCart = asyncHandler(async (req, res) => {
     return res
       .status(201)
       .json(
-        new ApiResponse(201, null, `${product.name} added to cart successfully`)
+        new ApiResponse(
+          201,
+          null,
+          `${
+            product.name.length > 20
+              ? product.name.slice(0, 20) + "..."
+              : product.name.slice(0, 20)
+          } added to cart successfully`
+        )
       );
   }
   const productIndex = cart.products.findIndex(
     (item: any) => item.product.toString() === product._id.toString()
   );
   if (productIndex !== -1) {
+    if (product.stock < cart.products[productIndex].quantity + value.quantity) {
+      return res
+        .status(400)
+        .json(
+          new ApiResponse(
+            400,
+            null,
+            `Only ${product.stock - cart.products[productIndex].quantity} ${
+              product.name.length > 20
+                ? product.name.slice(0, 20) + "..."
+                : product.name.slice(0, 20)
+            } available in stock`
+          )
+        );
+    }
     cart.products[productIndex].quantity += value.quantity;
   } else {
     cart.products.push({ product: product._id, quantity: value.quantity });
@@ -63,7 +86,15 @@ const addToCart = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(
-      new ApiResponse(201, null, `${product.name} added to cart successfully`)
+      new ApiResponse(
+        201,
+        null,
+        `${
+          product.name.length > 20
+            ? product.name.slice(0, 20) + "..."
+            : product.name.slice(0, 20)
+        } added to cart successfully`
+      )
     );
 });
 
@@ -191,7 +222,11 @@ const changeQuantity = asyncHandler(async (req, res) => {
         new ApiResponse(
           400,
           null,
-          `Only ${product?.stock} ${product?.name} available in stock`
+          `Only ${product?.stock} ${
+            product.name.length > 20
+              ? product.name.slice(0, 20) + "..."
+              : product.name.slice(0, 20)
+          } available in stock`
         )
       );
   }

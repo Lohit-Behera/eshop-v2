@@ -288,10 +288,28 @@ const deleteProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Product deleted successfully"));
 });
 
+const homeProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({ isPublic: true })
+    .sort({ createdAt: -1 })
+    .limit(12)
+    .select(
+      "_id name originalPrice sellingPrice thumbnail discount category subCategory brand isPublic, stock"
+    );
+  if (!products || products.length === 0) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Products not found"));
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, products, "Products found successfully"));
+});
+
 export {
   createProduct,
   productDetails,
   allProducts,
   updateProduct,
   deleteProduct,
+  homeProducts,
 };

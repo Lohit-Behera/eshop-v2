@@ -479,15 +479,16 @@ function AddProductPage() {
                   )}
                 />
               </div>
+
               <FormField
                 control={form.control}
-                name="productDescription"
+                name="productDetails"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Description</FormLabel>
+                    <FormLabel>Product Details</FormLabel>
                     <FormControl>
                       <Editor
-                        placeholder="Product Description"
+                        placeholder="Product description"
                         content={field.value}
                         onChange={field.onChange}
                       />
@@ -498,13 +499,13 @@ function AddProductPage() {
               />
               <FormField
                 control={form.control}
-                name="productDetails"
+                name="productDescription"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Details</FormLabel>
+                    <FormLabel>Product Description</FormLabel>
                     <FormControl>
                       <Editor
-                        placeholder="Product description"
+                        placeholder="Product Description"
                         content={field.value}
                         onChange={field.onChange}
                       />
