@@ -130,8 +130,8 @@ function Header() {
                 className="rounded-lg bg-muted "
                 transition={{
                   type: "spring",
-                  bounce: 0.2,
-                  duration: 0.3,
+                  bounce: 0.3,
+                  duration: 0.6,
                 }}
               >
                 {TABS.map((tab) => (
@@ -151,10 +151,10 @@ function Header() {
             {userInfo && (
               <DropdownMenu>
                 <DropdownMenuTrigger className="outline-none">
-                  <Avatar className="outline-primary hover:outline outline-2 outline-offset-2">
+                  <Avatar className="outline-primary hover:outline outline-2 outline-offset-2 transition-all duration-200">
                     <AvatarImage src={userDetails ? userDetails.avatar : ""} />
                     <AvatarFallback>
-                      {userDetails?.fullName ? userDetails?.fullName[0] : "A"}
+                      <User2 className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
