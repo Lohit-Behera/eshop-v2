@@ -22,6 +22,7 @@ import CartPage from "./pages/protected/CartPage";
 import ProfilePage from "./pages/protected/ProfilePage";
 import CheckoutPage from "./pages/protected/CheckoutPage";
 import OrderPage from "./pages/protected/OrderPage";
+import CategoryPage from "./pages/protected/CategoryPage";
 
 // import admin pages
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -40,6 +41,7 @@ const router = createBrowserRouter(
       <Route path="/verify/:token" element={<VerifyPage />} />
       <Route path="/session-expired" element={<SessionExpiredPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/category" element={<CategoryPage />} />
       {/* protected routes */}
       <Route path="/" element={<ProtectedLayout />}>
         <Route index element={<HomePage />} />
