@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 interface IProduct {
   productId: string;
@@ -102,4 +103,9 @@ const OrderSchema = new Schema<IOrder>(
   { timestamps: true }
 );
 
-export const Order = mongoose.model<IOrder>("Order", OrderSchema);
+OrderSchema.plugin(mongooseAggregatePaginate);
+
+export const Order = mongoose.model<
+  IOrder,
+  mongoose.AggregatePaginateModel<IOrder>
+>("Order", OrderSchema);

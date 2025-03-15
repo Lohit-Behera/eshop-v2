@@ -60,6 +60,9 @@ import {
 import { GlowInput } from "@/components/ui/glow-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TextMorph } from "@/components/ui/text-morph";
+import { fetchProfileOrder } from "@/feature/orderSlice";
+import { Link } from "react-router-dom";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const addressSchema = z.object({
   name: z
@@ -121,6 +124,9 @@ export default function ProfilePage() {
   const addresses = useSelector(
     (state: RootState) => state.address.allAddresses.data
   );
+  const profileOrder = useSelector(
+    (state: RootState) => state.order.profileOrder.data
+  );
   const form = useForm<z.infer<typeof addressSchema>>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -138,9 +144,11 @@ export default function ProfilePage() {
   });
 
   const allAddress = useAsyncDispatch(fetchAllAddresses);
+  const getProfileOrders = useAsyncDispatch(fetchProfileOrder);
 
   useEffect(() => {
     allAddress();
+    getProfileOrders();
   }, []);
   const createAddress = useDispatchWithToast(fetchCreateAddress, {
     loadingMessage: "Adding Address...",
@@ -390,72 +398,111 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {[1, 2, 3].map((order) => (
+                  {profileOrder.docs.map((order, index) => (
                     <motion.div
-                      key={order}
+                      key={order._id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: order * 0.1 }}
+                      transition={{ delay: index * 0.1 }}
                       className="border rounded-lg p-4"
                     >
                       <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
                         <div>
-                          <p className="font-medium">Order #{1000 + order}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Placed on {new Date().toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Badge
-                          variant={
-                            order === 1
-                              ? "default"
-                              : order === 2
-                              ? "secondary"
-                              : "outline"
-                          }
-                        >
-                          {order === 1
-                            ? "Delivered"
-                            : order === 2
-                            ? "Shipped"
-                            : "Processing"}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 rounded-md bg-muted flex items-center justify-center">
-                          <Package className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1">
                           <p className="font-medium">
-                            {order === 1
-                              ? "Wireless Headphones"
-                              : order === 2
-                              ? "Smart Watch"
-                              : "Laptop Sleeve"}
+                            Order #{order._id.substring(order._id.length - 6)}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {order === 1
-                              ? "Black"
-                              : order === 2
-                              ? "Silver"
-                              : "Navy Blue"}{" "}
-                            • Qty: 1
+                            Placed on{" "}
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium">
-                            $
-                            {order === 1
-                              ? "129.99"
-                              : order === 2
-                              ? "249.99"
-                              : "39.99"}
-                          </p>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge
+                            variant={
+                              order.status === "Delivered"
+                                ? "default"
+                                : order.status === "Shipped"
+                                ? "secondary"
+                                : "outline"
+                            }
+                          >
+                            {order.status}
+                          </Badge>
+                          <Badge
+                            variant={
+                              order.paymentStatus === "Paid"
+                                ? "success"
+                                : "destructive"
+                            }
+                          >
+                            {order.paymentStatus}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="mt-4 flex justify-end">
-                        <Button variant="outline" size="sm">
-                          View Details
+
+                      {/* Products in this order */}
+                      <div className="space-y-4">
+                        {order.products.map((product) => (
+                          <div
+                            key={product.productId}
+                            className="flex items-center gap-4"
+                          >
+                            <div className="h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
+                              <img
+                                src={product.thumbnail || "/placeholder.svg"}
+                                alt={product.name}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm md:text-base line-clamp-2">
+                                {product.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Qty: {product.quantity}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">
+                                ₹{product.sellingPrice.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Order summary */}
+                      <div className="mt-4 border-t pt-4">
+                        <div className="space-y-1 text-xs sm:text-sm ">
+                          <div className="flex justify-between ">
+                            <span className="text-muted-foreground">
+                              Subtotal:
+                            </span>
+                            <span>₹{order.totalPrice.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">
+                              Shipping:
+                            </span>
+                            <span>₹{order.shippingPrice.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Tax:</span>
+                            <span>₹{order.tax.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between font-medium">
+                            <span>Total:</span>
+                            <span>₹{order.grandTotal.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex justify-between items-center">
+                        <span className=" text-xs sm:text-sm  text-muted-foreground">
+                          Payment via {order.paymentMethod}
+                        </span>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/order/${order._id}`}>View Details</Link>
                         </Button>
                       </div>
                     </motion.div>
@@ -599,6 +646,13 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Personalization</h3>
+                  <div className="flex items-center justify-between">
+                    <Label>Dark mode</Label>
+                    <ModeToggle />
+                  </div>
+                </div>
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Notifications</h3>
                   <div className="space-y-3">

@@ -129,4 +129,36 @@ const getOrder = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, order, "Order found"));
 });
 
-export { orderInitializeRazorpay, orderPlacedRazorpay, getOrder };
+const profileOrderList = asyncHandler(async (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  // Aggregation pipeline
+  const aggregateQuery = Order.aggregate([
+    { $match: { userId: req.user?._id } },
+    { $sort: { createdAt: -1 } },
+    {
+      $project: {
+        userId: 0,
+        shippingAddress: 0,
+        razorpay: 0,
+        __v: 0,
+      },
+    },
+  ]);
+
+  // Apply pagination
+  const orders = await Order.aggregatePaginate(aggregateQuery, { page, limit });
+
+  if (!orders || orders.docs.length === 0) {
+    return res.status(404).json(new ApiResponse(404, null, "No orders found"));
+  }
+  return res.status(200).json(new ApiResponse(200, orders, "Orders found"));
+});
+
+export {
+  orderInitializeRazorpay,
+  orderPlacedRazorpay,
+  getOrder,
+  profileOrderList,
+};
