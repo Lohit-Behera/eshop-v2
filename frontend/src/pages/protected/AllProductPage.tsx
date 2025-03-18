@@ -34,7 +34,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/ui/accordion-motion";
 import ProductCard from "@/components/product-card";
 
 // Product type definition based on the provided data
@@ -340,10 +340,31 @@ export default function AllProductPage() {
         </div>
       </div>
 
+      <Select value={sortOption} onValueChange={setSortOption}>
+        <SelectTrigger className="w-[95%] mx-auto mt-4">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4" />
+            <SelectValue placeholder="Sort by" />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="featured">Featured</SelectItem>
+          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+          <SelectItem value="discount">Highest Discount</SelectItem>
+          <SelectItem value="newest">Newest First</SelectItem>
+        </SelectContent>
+      </Select>
+
       <div className="flex-1 overflow-auto p-4">
-        <Accordion defaultValue={["category", "price"]}>
+        <Accordion className="flex w-full flex-col space-y-2 divide-y divide-zinc-200 dark:divide-zinc-700">
           <AccordionItem value="category">
-            <AccordionTrigger>Categories</AccordionTrigger>
+            <AccordionTrigger className="w-full text-left ">
+              <div className="flex items-center justify-between">
+                <div>Category</div>
+                <ChevronDown className="h-4 w-4  transition-transform duration-200 data-[state=closed]:rotate-0 data-[state=open]:rotate-180 " />
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-2">
                 {categories.map((category) => (
@@ -358,32 +379,6 @@ export default function AllProductPage() {
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       {category}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="subcategory">
-            <AccordionTrigger>Sub Categories</AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2">
-                {subCategories.map((subCategory) => (
-                  <div
-                    key={subCategory}
-                    className="flex items-center space-x-2"
-                  >
-                    <Checkbox
-                      id={`subcategory-${subCategory}`}
-                      checked={selectedSubCategories.includes(subCategory)}
-                      onCheckedChange={() => toggleSubCategory(subCategory)}
-                    />
-                    <label
-                      htmlFor={`subcategory-${subCategory}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {subCategory}
                     </label>
                   </div>
                 ))}
@@ -595,25 +590,6 @@ export default function AllProductPage() {
             </Sheet>
 
             {/* Sort dropdown */}
-            <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <SelectValue placeholder="Sort by" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="price-low-high">
-                  Price: Low to High
-                </SelectItem>
-                <SelectItem value="price-high-low">
-                  Price: High to Low
-                </SelectItem>
-                <SelectItem value="discount">Highest Discount</SelectItem>
-                <SelectItem value="newest">Newest First</SelectItem>
-              </SelectContent>
-            </Select>
 
             {/* Search input - visible only on mobile */}
             <div className="relative md:hidden">
@@ -751,6 +727,26 @@ export default function AllProductPage() {
                       Reset
                     </Button>
                   </div>
+                  <Separator />
+                  <Select value={sortOption} onValueChange={setSortOption}>
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center gap-2">
+                        <SlidersHorizontal className="h-4 w-4" />
+                        <SelectValue placeholder="Sort by" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="featured">Featured</SelectItem>
+                      <SelectItem value="price-low-high">
+                        Price: Low to High
+                      </SelectItem>
+                      <SelectItem value="price-high-low">
+                        Price: High to Low
+                      </SelectItem>
+                      <SelectItem value="discount">Highest Discount</SelectItem>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                    </SelectContent>
+                  </Select>
 
                   <Separator />
 
@@ -761,16 +757,6 @@ export default function AllProductPage() {
                       selectedItems={selectedCategories}
                       toggleItem={toggleCategory}
                     />
-
-                    <Separator />
-
-                    <FilterSection
-                      title="Sub Categories"
-                      items={subCategories}
-                      selectedItems={selectedSubCategories}
-                      toggleItem={toggleSubCategory}
-                    />
-
                     <Separator />
 
                     <FilterSection
