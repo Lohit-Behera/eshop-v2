@@ -305,6 +305,18 @@ const homeProducts = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, products, "Products found successfully"));
 });
 
+const uniqueBrands = asyncHandler(async (req, res) => {
+  const products = await Product.find().distinct("brand");
+  if (!products || products.length === 0) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Products not found"));
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, products, "Products found successfully"));
+});
+
 export {
   createProduct,
   productDetails,
@@ -312,4 +324,5 @@ export {
   updateProduct,
   deleteProduct,
   homeProducts,
+  uniqueBrands,
 };

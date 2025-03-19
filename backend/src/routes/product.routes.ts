@@ -9,6 +9,7 @@ import {
   updateProduct,
   deleteProduct,
   homeProducts,
+  uniqueBrands,
 } from "../controllers/productController";
 
 const productRouter = Router();
@@ -42,5 +43,7 @@ productRouter.patch(
 productRouter.delete("/delete/:productId", authMiddleware, deleteProduct);
 
 productRouter.get("/get/home", authMiddleware, homeProducts);
+
+productRouter.get("/get/brands", authMiddleware, uniqueBrands);
 
 export default productRouter;

@@ -8,6 +8,7 @@ import { fetchAllCategories } from "./feature/categorySlice";
 import { useAsyncDispatch } from "./hooks/dispatch";
 import { fetchAllAddresses } from "./feature/addressSlice";
 import { fetchGetCart } from "./feature/cartSlice";
+import { fetchUniqueBrands } from "./feature/productSlice";
 
 function Layout() {
   const location = useLocation();
@@ -16,6 +17,7 @@ function Layout() {
   const fetchCategories = useAsyncDispatch(fetchAllCategories);
   const fetchAddresses = useAsyncDispatch(fetchAllAddresses);
   const fetchCart = useAsyncDispatch(fetchGetCart);
+  const fetchBrands = useAsyncDispatch(fetchUniqueBrands);
   const userDetailsStatus = useSelector(
     (state: RootState) => state.user.userDetailsStatus
   );
@@ -32,6 +34,7 @@ function Layout() {
 
   useLayoutEffect(() => {
     fetchCategories();
+    fetchBrands();
   }, []);
 
   const isAdminRoute = location.pathname.startsWith("/admin");

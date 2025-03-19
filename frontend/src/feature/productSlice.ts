@@ -191,6 +191,32 @@ export const fetchHomeProducts = createAsyncThunk(
   }
 );
 
+export const fetchUniqueBrands = createAsyncThunk(
+  "product/uniqueBrands",
+  async (_, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.get(
+        `${baseUrl}/api/v1/product/get/brands`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting all the products";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState: {
@@ -217,6 +243,10 @@ const productSlice = createSlice({
     homeProducts: { data: [] as HomeProduct[] },
     homeProductsStatus: "idle",
     homeProductsError: {},
+
+    uniqueBrands: { data: [] as string[] },
+    uniqueBrandsStatus: "idle",
+    uniqueBrandsError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -301,6 +331,21 @@ const productSlice = createSlice({
         state.homeProductsError =
           action.payload ||
           "Something went wrong while getting all the products";
+      })
+
+      // unique brands
+      .addCase(fetchUniqueBrands.pending, (state) => {
+        state.uniqueBrandsStatus = "loading";
+      })
+      .addCase(fetchUniqueBrands.fulfilled, (state, action) => {
+        state.uniqueBrandsStatus = "succeeded";
+        state.uniqueBrands = action.payload;
+      })
+      .addCase(fetchUniqueBrands.rejected, (state, action) => {
+        state.uniqueBrandsStatus = "failed";
+        state.uniqueBrandsError =
+          action.payload ||
+          "Something went wrong while getting all the unique brands";
       });
   },
 });
