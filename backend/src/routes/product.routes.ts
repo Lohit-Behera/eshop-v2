@@ -10,6 +10,7 @@ import {
   deleteProduct,
   homeProducts,
   uniqueBrands,
+  getFilteredProducts,
 } from "../controllers/productController";
 
 const productRouter = Router();
@@ -45,5 +46,7 @@ productRouter.delete("/delete/:productId", authMiddleware, deleteProduct);
 productRouter.get("/get/home", authMiddleware, homeProducts);
 
 productRouter.get("/get/brands", authMiddleware, uniqueBrands);
+
+productRouter.get("/get/filtered", authMiddleware, getFilteredProducts);
 
 export default productRouter;

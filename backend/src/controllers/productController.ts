@@ -317,6 +317,116 @@ const uniqueBrands = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, products, "Products found successfully"));
 });
 
+const getFilteredProducts = asyncHandler(async (req, res) => {
+  const { search, category, brand, priceMin, priceMax, stock, discount, sort } =
+    req.query;
+
+  // Build match conditions for the aggregation
+  const matchConditions: any = { isPublic: true };
+
+  // Apply search filter if provided
+  if (search) {
+    matchConditions.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { brand: { $regex: search, $options: "i" } },
+      { category: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  // Apply category filter (handle multiple categories)
+  if (category) {
+    const categories = Array.isArray(category) ? category : [category];
+    matchConditions.category = { $in: categories };
+  }
+
+  // Apply brand filter (handle multiple brands)
+  if (brand) {
+    const brands = Array.isArray(brand) ? brand : [brand];
+    matchConditions.brand = { $in: brands };
+  }
+
+  // Apply price range filter
+  if (priceMin || priceMax) {
+    matchConditions.sellingPrice = {};
+
+    if (priceMin) {
+      matchConditions.sellingPrice.$gte = Number(priceMin);
+    }
+
+    if (priceMax) {
+      matchConditions.sellingPrice.$lte = Number(priceMax);
+    }
+  }
+
+  // Apply stock filter
+  if (stock === "in-stock") {
+    matchConditions.stock = { $gt: 0 };
+  } else if (stock === "out-of-stock") {
+    matchConditions.stock = { $lte: 0 };
+  }
+
+  // Apply discount filter
+  if (discount) {
+    matchConditions.discount = { $gte: Number(discount) };
+  }
+
+  // Create the aggregation pipeline
+  const pipeline: mongoose.PipelineStage[] = [
+    { $match: matchConditions },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        originalPrice: 1,
+        sellingPrice: 1,
+        discount: 1,
+        category: 1,
+        subCategory: 1,
+        brand: 1,
+        thumbnail: 1,
+        stock: 1,
+      },
+    },
+  ];
+
+  // Apply sorting
+  if (sort) {
+    switch (sort) {
+      case "price-low-high":
+        pipeline.push({ $sort: { sellingPrice: 1 } });
+        break;
+      case "price-high-low":
+        pipeline.push({ $sort: { sellingPrice: -1 } });
+        break;
+      case "discount":
+        pipeline.push({ $sort: { discount: -1 } });
+        break;
+      case "newest":
+        pipeline.push({ $sort: { createdAt: -1 } });
+        break;
+      default:
+        // Default sorting (featured)
+        pipeline.push({ $sort: { _id: -1 } });
+    }
+  } else {
+    // Default sorting if not specified
+    pipeline.push({ $sort: { _id: -1 } });
+  }
+
+  // Execute the aggregation
+  const products = await Product.aggregatePaginate(pipeline);
+
+  if (!products || products.docs.length === 0) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Products not found"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(404, products, "Products found successfully"));
+});
+
 export {
   createProduct,
   productDetails,
@@ -325,4 +435,5 @@ export {
   deleteProduct,
   homeProducts,
   uniqueBrands,
+  getFilteredProducts,
 };

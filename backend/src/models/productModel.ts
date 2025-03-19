@@ -79,4 +79,7 @@ const productSchema = new Schema<IProduct>(
 
 productSchema.plugin(mongooseAggregatePaginate);
 
-export const Product = mongoose.model<IProduct>("Product", productSchema);
+export const Product = mongoose.model<
+  IProduct,
+  mongoose.AggregatePaginateModel<IProduct>
+>("Product", productSchema);

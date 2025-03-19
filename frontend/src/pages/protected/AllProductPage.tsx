@@ -39,7 +39,9 @@ import ProductCard from "@/components/product-card";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Category } from "@/feature/categorySlice";
-
+import { useAsyncDispatch } from "@/hooks/dispatch";
+import { fetchFilteredProducts } from "@/feature/productSlice";
+// TODO paginate this page
 // Product type definition
 interface Product {
   _id: string;
@@ -69,10 +71,18 @@ interface FilterQuery {
 
 export default function AllProductPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const categories = useSelector(
+    (state: RootState) => state.category.getAllCategories.data
+  );
+  const brands = useSelector(
+    (state: RootState) => state.product.uniqueBrands.data
+  );
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const productsData = useSelector(
+    (state: RootState) => state.product.filteredProducts.data
+  );
+  const products = productsData.docs || [];
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,14 +116,6 @@ export default function AllProductPage() {
   const [activeFilters, setActiveFilters] = useState<number>(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Extract unique values for filter options
-  const categories = useSelector(
-    (state: RootState) => state.category.getAllCategories.data
-  );
-  const brands = useSelector(
-    (state: RootState) => state.product.uniqueBrands.data
-  );
-
   // Calculate min and max prices
   const minPrice =
     products.length > 0
@@ -124,36 +126,18 @@ export default function AllProductPage() {
       ? Math.max(...products.map((product) => product.sellingPrice))
       : 150000;
 
+  const fetchProducts = useAsyncDispatch(fetchFilteredProducts, {
+    onSuccess: () => {
+      setLoading(false);
+    },
+    onError: () => {
+      setLoading(false);
+    },
+  });
   // Fetch products based on search params
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Use the current searchParams directly for the API call
-        const url = `/api/products${window.location.search}`;
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`Error fetching products: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setProducts(data);
-        setFilteredProducts(data);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
+    const queryString = searchParams.toString();
+    fetchProducts(queryString || "");
   }, [searchParams]);
 
   // Apply filters - updates URL search params
@@ -192,6 +176,7 @@ export default function AllProductPage() {
       newSearchParams.set("sort", sortOption);
     }
 
+    // Set the search params which will trigger a re-render and the useEffect
     setSearchParams(newSearchParams);
     setIsFilterOpen(false);
   };
@@ -201,7 +186,7 @@ export default function AllProductPage() {
     setSearchQuery("");
     setSelectedCategories([]);
     setSelectedBrands([]);
-    setPriceRange([minPrice, maxPrice]);
+    setPriceRange([0, maxPrice]);
     setStockFilter("all");
     setDiscountFilter(null);
     setSortOption("featured");
@@ -248,49 +233,6 @@ export default function AllProductPage() {
     setSelectedBrands((prev) =>
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
-  };
-
-  // Remove a single filter
-  const removeFilter = (type: string, value?: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-
-    switch (type) {
-      case "search":
-        newSearchParams.delete("search");
-        setSearchQuery("");
-        break;
-      case "category":
-        if (value) {
-          newSearchParams.delete("category", value);
-          setSelectedCategories((prev) => prev.filter((c) => c !== value));
-        }
-        break;
-      case "brand":
-        if (value) {
-          newSearchParams.delete("brand", value);
-          setSelectedBrands((prev) => prev.filter((b) => b !== value));
-        }
-        break;
-      case "price":
-        newSearchParams.delete("priceMin");
-        newSearchParams.delete("priceMax");
-        setPriceRange([minPrice, maxPrice]);
-        break;
-      case "stock":
-        newSearchParams.delete("stock");
-        setStockFilter("all");
-        break;
-      case "discount":
-        newSearchParams.delete("discount");
-        setDiscountFilter(null);
-        break;
-      case "sort":
-        newSearchParams.delete("sort");
-        setSortOption("featured");
-        break;
-    }
-
-    setSearchParams(newSearchParams);
   };
 
   // Filter sidebar for mobile
@@ -543,460 +485,466 @@ export default function AllProductPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
+      {loading ? (
+        <p className="text-center">Loading</p>
+      ) : (
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            {/* Mobile filter button */}
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 md:hidden"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filters
-                  {activeFilters > 0 && (
-                    <Badge variant="secondary" className="ml-1">
-                      {activeFilters}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-full sm:max-w-md p-0">
-                <SheetHeader className="p-4 border-b">
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
-                <FilterSidebar />
-              </SheetContent>
-            </Sheet>
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              {/* Mobile filter button */}
+              <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 md:hidden"
+                  >
+                    <Filter className="h-4 w-4" />
+                    Filters
+                    {activeFilters > 0 && (
+                      <Badge variant="secondary" className="ml-1">
+                        {activeFilters}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-full sm:max-w-md p-0">
+                  <SheetHeader className="p-4 border-b">
+                    <SheetTitle>Filters</SheetTitle>
+                  </SheetHeader>
+                  <FilterSidebar />
+                </SheetContent>
+              </Sheet>
 
-            {/* Search input - visible only on mobile */}
-            <div className="relative md:hidden">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
+              {/* Search input - visible only on mobile */}
+              <div className="relative md:hidden">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Active filters */}
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5, transition: "easeInOut" }}
-          >
-            {activeFilters > 0 && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex flex-wrap gap-2 items-center"
-                >
-                  <span className="text-sm text-muted-foreground">
-                    Active filters:
-                  </span>
-
-                  {searchQuery && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        Search: {searchQuery}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => setSearchQuery("")}
-                        />
-                      </Badge>
-                    </motion.div>
-                  )}
-
-                  {selectedCategories.map((category) => (
-                    <motion.div
-                      key={category}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {category}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => toggleCategory(category)}
-                        />
-                      </Badge>
-                    </motion.div>
-                  ))}
-
-                  {selectedBrands.map((brand) => (
-                    <motion.div
-                      key={brand}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {brand}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => toggleBrand(brand)}
-                        />
-                      </Badge>
-                    </motion.div>
-                  ))}
-
-                  {(priceRange[0] > minPrice || priceRange[1] < maxPrice) && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        ₹{priceRange[0].toLocaleString()} - ₹
-                        {priceRange[1].toLocaleString()}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => setPriceRange([minPrice, maxPrice])}
-                        />
-                      </Badge>
-                    </motion.div>
-                  )}
-
-                  {stockFilter !== "all" && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {stockFilter === "in-stock"
-                          ? "In Stock"
-                          : "Out of Stock"}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => setStockFilter("all")}
-                        />
-                      </Badge>
-                    </motion.div>
-                  )}
-
-                  {discountFilter !== null && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {discountFilter}% or more off
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => setDiscountFilter(null)}
-                        />
-                      </Badge>
-                    </motion.div>
-                  )}
-
-                  {sortOption !== "featured" && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        Sort: {sortOption}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => setSortOption("featured")}
-                        />
-                      </Badge>
-                    </motion.div>
-                  )}
-
+          {/* Active filters */}
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5, transition: "easeInOut" }}
+            >
+              {activeFilters > 0 && (
+                <>
                   <motion.div
-                    layout
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex flex-wrap gap-2 items-center"
                   >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs h-7 px-2"
-                      onClick={resetFilters}
+                    <span className="text-sm text-muted-foreground">
+                      Active filters:
+                    </span>
+
+                    {searchQuery && (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          Search: {searchQuery}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => setSearchQuery("")}
+                          />
+                        </Badge>
+                      </motion.div>
+                    )}
+
+                    {selectedCategories.map((category) => (
+                      <motion.div
+                        key={category}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {category}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => toggleCategory(category)}
+                          />
+                        </Badge>
+                      </motion.div>
+                    ))}
+
+                    {selectedBrands.map((brand) => (
+                      <motion.div
+                        key={brand}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {brand}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => toggleBrand(brand)}
+                          />
+                        </Badge>
+                      </motion.div>
+                    ))}
+
+                    {(priceRange[0] > minPrice || priceRange[1] < maxPrice) && (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          ₹{priceRange[0].toLocaleString()} - ₹
+                          {priceRange[1].toLocaleString()}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => setPriceRange([minPrice, maxPrice])}
+                          />
+                        </Badge>
+                      </motion.div>
+                    )}
+
+                    {stockFilter !== "all" && (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {stockFilter === "in-stock"
+                            ? "In Stock"
+                            : "Out of Stock"}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => setStockFilter("all")}
+                          />
+                        </Badge>
+                      </motion.div>
+                    )}
+
+                    {discountFilter !== null && (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {discountFilter}% or more off
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => setDiscountFilter(null)}
+                          />
+                        </Badge>
+                      </motion.div>
+                    )}
+
+                    {sortOption !== "featured" && (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          Sort: {sortOption}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() => setSortOption("featured")}
+                          />
+                        </Badge>
+                      </motion.div>
+                    )}
+
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      Clear All
-                    </Button>
-                  </motion.div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7 px-2"
+                        onClick={resetFilters}
+                      >
+                        Clear All
+                      </Button>
+                    </motion.div>
 
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 px-2 items-center"
-                      onClick={applyFilters}
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      Apply Filters
-                    </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 px-2 items-center"
+                        onClick={applyFilters}
+                      >
+                        Apply Filters
+                      </Button>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              </>
-            )}
-          </motion.div>
-        </AnimatePresence>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Desktop sidebar */}
-          <div className="hidden md:block w-64 shrink-0">
-            <div className="sticky top-4 space-y-6">
-              <div className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Desktop sidebar */}
+            <div className="hidden md:block w-64 shrink-0">
+              <div className="sticky top-4 space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Filters</h3>
-                    <Button variant="ghost" size="sm" onClick={resetFilters}>
-                      Reset
-                    </Button>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search products..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
                   </div>
-                  <Separator />
-                  <Select value={sortOption} onValueChange={setSortOption}>
-                    <SelectTrigger className="w-full">
-                      <div className="flex items-center gap-2">
-                        <SlidersHorizontal className="h-4 w-4" />
-                        <SelectValue placeholder="Sort by" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="featured">Featured</SelectItem>
-                      <SelectItem value="price-low-high">
-                        Price: Low to High
-                      </SelectItem>
-                      <SelectItem value="price-high-low">
-                        Price: High to Low
-                      </SelectItem>
-                      <SelectItem value="discount">Highest Discount</SelectItem>
-                      <SelectItem value="newest">Newest First</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Separator />
 
                   <div className="space-y-4">
-                    <FilterSection
-                      title="Categories"
-                      items={categories}
-                      selectedItems={selectedCategories}
-                      toggleItem={toggleCategory}
-                    />
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">Filters</h3>
+                      <Button variant="ghost" size="sm" onClick={resetFilters}>
+                        Reset
+                      </Button>
+                    </div>
                     <Separator />
-
-                    <FilterSection
-                      title="Brands"
-                      items={brands}
-                      selectedItems={selectedBrands}
-                      toggleItem={toggleBrand}
-                    />
+                    <Select value={sortOption} onValueChange={setSortOption}>
+                      <SelectTrigger className="w-full">
+                        <div className="flex items-center gap-2">
+                          <SlidersHorizontal className="h-4 w-4" />
+                          <SelectValue placeholder="Sort by" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="featured">Featured</SelectItem>
+                        <SelectItem value="price-low-high">
+                          Price: Low to High
+                        </SelectItem>
+                        <SelectItem value="price-high-low">
+                          Price: High to Low
+                        </SelectItem>
+                        <SelectItem value="discount">
+                          Highest Discount
+                        </SelectItem>
+                        <SelectItem value="newest">Newest First</SelectItem>
+                      </SelectContent>
+                    </Select>
 
                     <Separator />
 
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium">Price Range</h4>
-                        <div className="text-xs text-muted-foreground">
-                          ₹{priceRange[0].toLocaleString()} - ₹
-                          {priceRange[1].toLocaleString()}
-                        </div>
-                      </div>
-                      <Slider
-                        defaultValue={[minPrice, maxPrice]}
-                        min={minPrice}
-                        max={maxPrice}
-                        step={1000}
-                        value={priceRange}
-                        onValueChange={setPriceRange}
-                        className="my-6"
+                      <FilterSection
+                        title="Categories"
+                        items={categories}
+                        selectedItems={selectedCategories}
+                        toggleItem={toggleCategory}
                       />
-                    </div>
+                      <Separator />
 
-                    <Separator />
+                      <FilterSection
+                        title="Brands"
+                        items={brands}
+                        selectedItems={selectedBrands}
+                        toggleItem={toggleBrand}
+                      />
 
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Availability</h4>
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">Price Range</h4>
+                          <div className="text-xs text-muted-foreground">
+                            ₹{priceRange[0].toLocaleString()} - ₹
+                            {priceRange[1].toLocaleString()}
+                          </div>
+                        </div>
+                        <Slider
+                          defaultValue={[minPrice, maxPrice]}
+                          min={minPrice}
+                          max={maxPrice}
+                          step={1000}
+                          value={priceRange}
+                          onValueChange={setPriceRange}
+                          className="my-6"
+                        />
+                      </div>
+
+                      <Separator />
+
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-stock-all"
-                            checked={stockFilter === "all"}
-                            onCheckedChange={() => setStockFilter("all")}
-                          />
-                          <label
-                            htmlFor="desktop-stock-all"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            All
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-stock-in"
-                            checked={stockFilter === "in-stock"}
-                            onCheckedChange={() => setStockFilter("in-stock")}
-                          />
-                          <label
-                            htmlFor="desktop-stock-in"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            In Stock
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-stock-out"
-                            checked={stockFilter === "out-of-stock"}
-                            onCheckedChange={() =>
-                              setStockFilter("out-of-stock")
-                            }
-                          />
-                          <label
-                            htmlFor="desktop-stock-out"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            Out of Stock
-                          </label>
+                        <h4 className="text-sm font-medium">Availability</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-stock-all"
+                              checked={stockFilter === "all"}
+                              onCheckedChange={() => setStockFilter("all")}
+                            />
+                            <label
+                              htmlFor="desktop-stock-all"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              All
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-stock-in"
+                              checked={stockFilter === "in-stock"}
+                              onCheckedChange={() => setStockFilter("in-stock")}
+                            />
+                            <label
+                              htmlFor="desktop-stock-in"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              In Stock
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-stock-out"
+                              checked={stockFilter === "out-of-stock"}
+                              onCheckedChange={() =>
+                                setStockFilter("out-of-stock")
+                              }
+                            />
+                            <label
+                              htmlFor="desktop-stock-out"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              Out of Stock
+                            </label>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <Separator />
+                      <Separator />
 
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Discount</h4>
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-discount-all"
-                            checked={discountFilter === null}
-                            onCheckedChange={() => setDiscountFilter(null)}
-                          />
-                          <label
-                            htmlFor="desktop-discount-all"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            All
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-discount-10"
-                            checked={discountFilter === 10}
-                            onCheckedChange={() => setDiscountFilter(10)}
-                          />
-                          <label
-                            htmlFor="desktop-discount-10"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            10% or more
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-discount-20"
-                            checked={discountFilter === 20}
-                            onCheckedChange={() => setDiscountFilter(20)}
-                          />
-                          <label
-                            htmlFor="desktop-discount-20"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            20% or more
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-discount-30"
-                            checked={discountFilter === 30}
-                            onCheckedChange={() => setDiscountFilter(30)}
-                          />
-                          <label
-                            htmlFor="desktop-discount-30"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            30% or more
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="desktop-discount-50"
-                            checked={discountFilter === 50}
-                            onCheckedChange={() => setDiscountFilter(50)}
-                          />
-                          <label
-                            htmlFor="desktop-discount-50"
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            50% or more
-                          </label>
+                        <h4 className="text-sm font-medium">Discount</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-discount-all"
+                              checked={discountFilter === null}
+                              onCheckedChange={() => setDiscountFilter(null)}
+                            />
+                            <label
+                              htmlFor="desktop-discount-all"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              All
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-discount-10"
+                              checked={discountFilter === 10}
+                              onCheckedChange={() => setDiscountFilter(10)}
+                            />
+                            <label
+                              htmlFor="desktop-discount-10"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              10% or more
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-discount-20"
+                              checked={discountFilter === 20}
+                              onCheckedChange={() => setDiscountFilter(20)}
+                            />
+                            <label
+                              htmlFor="desktop-discount-20"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              20% or more
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-discount-30"
+                              checked={discountFilter === 30}
+                              onCheckedChange={() => setDiscountFilter(30)}
+                            />
+                            <label
+                              htmlFor="desktop-discount-30"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              30% or more
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="desktop-discount-50"
+                              checked={discountFilter === 50}
+                              onCheckedChange={() => setDiscountFilter(50)}
+                            />
+                            <label
+                              htmlFor="desktop-discount-50"
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              50% or more
+                            </label>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1004,49 +952,49 @@ export default function AllProductPage() {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Product grid */}
-          <div className="flex-1">
-            <AnimatePresence>
-              {filteredProducts.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col items-center justify-center py-12"
-                >
-                  <h3 className="text-xl font-semibold mb-2">
-                    No products found
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    Try adjusting your filters or search query
-                  </p>
-                  <Button onClick={resetFilters}>Reset Filters</Button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  layout
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                >
-                  {filteredProducts.map((product) => (
-                    <motion.div
-                      key={product._id}
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <ProductCard product={product} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Product grid */}
+            <div className="flex-1">
+              <AnimatePresence>
+                {products.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center justify-center py-12"
+                  >
+                    <h3 className="text-xl font-semibold mb-2">
+                      No products found
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Try adjusting your filters or search query
+                    </p>
+                    <Button onClick={resetFilters}>Reset Filters</Button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    layout
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  >
+                    {products.map((product) => (
+                      <motion.div
+                        key={product._id}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ProductCard product={product} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

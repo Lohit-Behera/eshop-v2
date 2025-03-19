@@ -36,6 +36,20 @@ export interface HomeProduct {
   thumbnail: string;
 }
 
+interface FilteredProducts {
+  docs: Product[];
+  totalDocs: number;
+  limit: number;
+  page: number;
+  totalPages: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  offset: number;
+  prevPage: number | null;
+  nextPage: number | null;
+}
+
 export const fetchCreateProduct = createAsyncThunk(
   "product/createProduct",
   async (product: FormData, { rejectWithValue }) => {
@@ -217,6 +231,32 @@ export const fetchUniqueBrands = createAsyncThunk(
   }
 );
 
+export const fetchFilteredProducts = createAsyncThunk(
+  "product/filterProducts",
+  async (filter: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.get(
+        `${baseUrl}/api/v1/product/get/filtered/?${filter}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting all the products";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState: {
@@ -247,6 +287,10 @@ const productSlice = createSlice({
     uniqueBrands: { data: [] as string[] },
     uniqueBrandsStatus: "idle",
     uniqueBrandsError: {},
+
+    filteredProducts: { data: {} as FilteredProducts },
+    filteredProductsStatus: "idle",
+    filteredProductsError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -346,6 +390,21 @@ const productSlice = createSlice({
         state.uniqueBrandsError =
           action.payload ||
           "Something went wrong while getting all the unique brands";
+      })
+
+      // filtered products
+      .addCase(fetchFilteredProducts.pending, (state) => {
+        state.filteredProductsStatus = "loading";
+      })
+      .addCase(fetchFilteredProducts.fulfilled, (state, action) => {
+        state.filteredProductsStatus = "succeeded";
+        state.filteredProducts = action.payload;
+      })
+      .addCase(fetchFilteredProducts.rejected, (state, action) => {
+        state.filteredProductsStatus = "failed";
+        state.filteredProductsError =
+          action.payload ||
+          "Something went wrong while getting all the filtered products";
       });
   },
 });
