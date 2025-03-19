@@ -8,7 +8,7 @@ import {
   ChevronUp,
   Search,
 } from "lucide-react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -190,6 +190,7 @@ export default function AllProductPage() {
     setStockFilter("all");
     setDiscountFilter(null);
     setSortOption("featured");
+    setIsFilterOpen(false);
 
     // Clear all search params and navigate to the base URL
     setSearchParams(new URLSearchParams());
@@ -255,6 +256,29 @@ export default function AllProductPage() {
           />
         </div>
       </div>
+
+      <ActiveFilters
+        className="block md:hidden my-2 mx-auto w-[95%]"
+        activeFilters={activeFilters}
+        searchQuery={searchQuery}
+        selectedCategories={selectedCategories}
+        selectedBrands={selectedBrands}
+        priceRange={priceRange}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        stockFilter={stockFilter}
+        discountFilter={discountFilter}
+        sortOption={sortOption}
+        setSearchQuery={setSearchQuery}
+        toggleCategory={toggleCategory}
+        toggleBrand={toggleBrand}
+        setPriceRange={setPriceRange}
+        setStockFilter={setStockFilter}
+        setDiscountFilter={setDiscountFilter}
+        setSortOption={setSortOption}
+        resetFilters={resetFilters}
+        applyFilters={applyFilters}
+      />
 
       <Select value={sortOption} onValueChange={setSortOption}>
         <SelectTrigger className="w-[95%] mx-auto mt-4">
@@ -513,6 +537,7 @@ export default function AllProductPage() {
                   <SheetHeader className="p-4 border-b">
                     <SheetTitle>Filters</SheetTitle>
                   </SheetHeader>
+
                   <FilterSidebar />
                 </SheetContent>
               </Sheet>
@@ -531,216 +556,28 @@ export default function AllProductPage() {
           </div>
 
           {/* Active filters */}
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, transition: "easeInOut" }}
-            >
-              {activeFilters > 0 && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex flex-wrap gap-2 items-center"
-                  >
-                    <span className="text-sm text-muted-foreground">
-                      Active filters:
-                    </span>
-
-                    {searchQuery && (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          Search: {searchQuery}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => setSearchQuery("")}
-                          />
-                        </Badge>
-                      </motion.div>
-                    )}
-
-                    {selectedCategories.map((category) => (
-                      <motion.div
-                        key={category}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {category}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => toggleCategory(category)}
-                          />
-                        </Badge>
-                      </motion.div>
-                    ))}
-
-                    {selectedBrands.map((brand) => (
-                      <motion.div
-                        key={brand}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {brand}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => toggleBrand(brand)}
-                          />
-                        </Badge>
-                      </motion.div>
-                    ))}
-
-                    {(priceRange[0] > minPrice || priceRange[1] < maxPrice) && (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          ₹{priceRange[0].toLocaleString()} - ₹
-                          {priceRange[1].toLocaleString()}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => setPriceRange([minPrice, maxPrice])}
-                          />
-                        </Badge>
-                      </motion.div>
-                    )}
-
-                    {stockFilter !== "all" && (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {stockFilter === "in-stock"
-                            ? "In Stock"
-                            : "Out of Stock"}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => setStockFilter("all")}
-                          />
-                        </Badge>
-                      </motion.div>
-                    )}
-
-                    {discountFilter !== null && (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {discountFilter}% or more off
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => setDiscountFilter(null)}
-                          />
-                        </Badge>
-                      </motion.div>
-                    )}
-
-                    {sortOption !== "featured" && (
-                      <motion.div
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          Sort: {sortOption}
-                          <X
-                            className="h-3 w-3 cursor-pointer"
-                            onClick={() => setSortOption("featured")}
-                          />
-                        </Badge>
-                      </motion.div>
-                    )}
-
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7 px-2"
-                        onClick={resetFilters}
-                      >
-                        Clear All
-                      </Button>
-                    </motion.div>
-
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-7 px-2 items-center"
-                        onClick={applyFilters}
-                      >
-                        Apply Filters
-                      </Button>
-                    </motion.div>
-                  </motion.div>
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <ActiveFilters
+            className="hidden md:block"
+            activeFilters={activeFilters}
+            searchQuery={searchQuery}
+            selectedCategories={selectedCategories}
+            selectedBrands={selectedBrands}
+            priceRange={priceRange}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            stockFilter={stockFilter}
+            discountFilter={discountFilter}
+            sortOption={sortOption}
+            setSearchQuery={setSearchQuery}
+            toggleCategory={toggleCategory}
+            toggleBrand={toggleBrand}
+            setPriceRange={setPriceRange}
+            setStockFilter={setStockFilter}
+            setDiscountFilter={setDiscountFilter}
+            setSortOption={setSortOption}
+            resetFilters={resetFilters}
+            applyFilters={applyFilters}
+          />
 
           <div className="flex flex-col md:flex-row gap-6">
             {/* Desktop sidebar */}
@@ -1089,3 +926,163 @@ function FilterSection({
     </div>
   );
 }
+
+interface ActiveFiltersProps {
+  className?: string;
+  activeFilters: number;
+  searchQuery: string;
+  selectedCategories: string[];
+  selectedBrands: string[];
+  priceRange: number[];
+  minPrice: number;
+  maxPrice: number;
+  stockFilter: string;
+  discountFilter: number | null;
+  sortOption: string;
+  setSearchQuery: (value: string) => void;
+  toggleCategory: (category: string) => void;
+  toggleBrand: (brand: string) => void;
+  setPriceRange: (range: number[]) => void;
+  setStockFilter: (filter: string) => void;
+  setDiscountFilter: (discount: number | null) => void;
+  setSortOption: (option: string) => void;
+  resetFilters: () => void;
+  applyFilters: () => void;
+}
+
+const ActiveFilters: React.FC<ActiveFiltersProps> = ({
+  className = "",
+  activeFilters,
+  searchQuery,
+  selectedCategories,
+  selectedBrands,
+  priceRange,
+  minPrice,
+  maxPrice,
+  stockFilter,
+  discountFilter,
+  sortOption,
+  setSearchQuery,
+  toggleCategory,
+  toggleBrand,
+  setPriceRange,
+  setStockFilter,
+  setDiscountFilter,
+  setSortOption,
+  resetFilters,
+  applyFilters,
+}) => {
+  return (
+    <AnimatePresence>
+      {activeFilters > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, transition: "easeInOut" }}
+          className={`${className}`}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-wrap gap-2 items-center"
+          >
+            <span className="text-sm text-muted-foreground">
+              Active filters:
+            </span>
+
+            {searchQuery && (
+              <FilterBadge
+                label={`Search: ${searchQuery}`}
+                onRemove={() => setSearchQuery("")}
+              />
+            )}
+
+            {selectedCategories.map((category) => (
+              <FilterBadge
+                key={category}
+                label={category}
+                onRemove={() => toggleCategory(category)}
+              />
+            ))}
+
+            {selectedBrands.map((brand) => (
+              <FilterBadge
+                key={brand}
+                label={brand}
+                onRemove={() => toggleBrand(brand)}
+              />
+            ))}
+
+            {(priceRange[0] > minPrice || priceRange[1] < maxPrice) && (
+              <FilterBadge
+                label={`₹${priceRange[0].toLocaleString()} - ₹${priceRange[1].toLocaleString()}`}
+                onRemove={() => setPriceRange([minPrice, maxPrice])}
+              />
+            )}
+
+            {stockFilter !== "all" && (
+              <FilterBadge
+                label={stockFilter === "in-stock" ? "In Stock" : "Out of Stock"}
+                onRemove={() => setStockFilter("all")}
+              />
+            )}
+
+            {discountFilter !== null && (
+              <FilterBadge
+                label={`${discountFilter}% or more off`}
+                onRemove={() => setDiscountFilter(null)}
+              />
+            )}
+
+            {sortOption !== "featured" && (
+              <FilterBadge
+                label={`Sort: ${sortOption}`}
+                onRemove={() => setSortOption("featured")}
+              />
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-7 px-2"
+              onClick={resetFilters}
+            >
+              Clear All
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 px-2 items-center"
+              onClick={applyFilters}
+            >
+              Apply Filters
+            </Button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// Reusable filter badge component
+const FilterBadge: React.FC<{ label: string; onRemove: () => void }> = ({
+  label,
+  onRemove,
+}) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.8 }}
+    transition={{ duration: 0.2 }}
+  >
+    <Badge variant="secondary" className="flex items-center gap-1">
+      {label}
+      <X className="h-3 w-3 cursor-pointer" onClick={onRemove} />
+    </Badge>
+  </motion.div>
+);

@@ -126,7 +126,7 @@ export function CategoryCard({
 
         <CardFooter className="pt-0 pb-4">
           <Button asChild variant="outline" className="w-full">
-            <Link to={`/categories/${category._id}`}>
+            <Link to={`/products/?category=${category.name}`}>
               Browse All {category.name}
             </Link>
           </Button>
