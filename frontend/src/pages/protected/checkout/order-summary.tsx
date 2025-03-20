@@ -129,17 +129,12 @@ export default function OrderSummary({ checkoutData }: OrderSummaryProps) {
         </div>
         <div className="flex justify-between text-sm md:text-base">
           <span className="text-muted-foreground">Shipping</span>
-          <span>₹{cart.shippingPrice.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between text-sm md:text-base">
-          <span className="text-muted-foreground">Tax</span>
-          <span>₹{cart.tax.toLocaleString()}</span>
+          <span>₹{checkoutData.shippingPrice.toLocaleString()}</span>
         </div>
         <div className="flex justify-between font-medium text-base md:text-lg mt-2 pt-2 border-t">
           <span>Total</span>
           <span>
-            ₹
-            {(cart.totalPrice + cart.tax + cart.shippingPrice).toLocaleString()}
+            ₹{(cart.totalPrice + checkoutData.shippingPrice).toLocaleString()}
           </span>
         </div>
       </div>

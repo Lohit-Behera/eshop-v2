@@ -16,8 +16,6 @@ interface Cart {
   userId: string;
   cartId: string;
   totalPrice: number;
-  shippingPrice: number;
-  tax: number;
   products: Product[];
 }
 

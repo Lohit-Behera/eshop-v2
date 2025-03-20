@@ -144,18 +144,10 @@ const getCart = asyncHandler(async (req, res) => {
       },
     },
     {
-      $set: {
-        shippingPrice: { $multiply: ["$totalPrice", 0.02] }, // 2% of total price
-        tax: { $multiply: ["$totalPrice", 0.1] }, // 10% of total price
-      },
-    },
-    {
       $project: {
         cartId: "$_id",
         userId: 1,
         totalPrice: 1,
-        shippingPrice: 1,
-        tax: 1,
         products: 1,
       },
     },

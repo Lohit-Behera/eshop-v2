@@ -304,33 +304,11 @@ function CartPage() {
                       })}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>
-                      {cart.shippingPrice.toLocaleString("en-IN", {
-                        style: "currency",
-                        currency: "INR",
-                      })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>
-                      {cart.tax.toLocaleString("en-IN", {
-                        style: "currency",
-                        currency: "INR",
-                      })}
-                    </span>
-                  </div>
                   <Separator />
                   <div className="flex justify-between font-medium text-base md:text-lg">
                     <span>Total</span>
                     <span>
-                      {(
-                        cart.totalPrice +
-                        cart.shippingPrice +
-                        cart.tax
-                      ).toLocaleString("en-IN", {
+                      {cart.totalPrice.toLocaleString("en-IN", {
                         style: "currency",
                         currency: "INR",
                       })}

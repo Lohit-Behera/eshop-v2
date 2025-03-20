@@ -12,6 +12,7 @@ export const razorpayPayment = async (
   userDetails: UserDetails,
   address: any,
   cart: any,
+  shippingPrice: number,
   fetchOrderPlaced: (response: {
     razorpay_order_id: string;
     razorpay_payment_id: string;
@@ -35,6 +36,7 @@ export const razorpayPayment = async (
         currency: "INR",
         cart,
         address,
+        shippingPrice,
       },
       {
         headers: {

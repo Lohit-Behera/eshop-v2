@@ -13,8 +13,12 @@ import { Address } from "@/feature/addressSlice";
 
 export default function ShippingAddress({
   onUpdateAddress,
+  totalPrice,
+  onShippingPriceChange,
 }: {
   onUpdateAddress: (address: Address) => void;
+  onShippingPriceChange: (price: number) => void;
+  totalPrice: number;
 }) {
   const allAddresses = useSelector(
     (state: RootState) => state.address.allAddresses.data
@@ -36,6 +40,18 @@ export default function ShippingAddress({
       allAddresses.find((addr) => addr._id === selectedAddressId)!
     );
   }, [selectedAddressId]);
+
+  useEffect(() => {
+    if (shippingMethod === "standard") {
+      if (totalPrice > 2000) {
+        onShippingPriceChange(0);
+      } else {
+        onShippingPriceChange(300);
+      }
+    } else if (shippingMethod === "express") {
+      onShippingPriceChange(600);
+    }
+  }, [shippingMethod]);
 
   const handleAddressSelect = (addressId: string) => {
     setSelectedAddressId(addressId);
@@ -136,7 +152,9 @@ export default function ShippingAddress({
             <Label htmlFor="standard" className="flex-1 cursor-pointer">
               <div className="flex justify-between flex-wrap sm:flex-nowrap">
                 <span className="text-sm md:text-base">Standard Shipping</span>
-                <span className="text-sm md:text-base">₹329.98</span>
+                <span className="text-sm md:text-base">
+                  {totalPrice > 2000 ? "Free" : "₹300"}
+                </span>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground">
                 Delivery in 3-5 business days
@@ -148,7 +166,7 @@ export default function ShippingAddress({
             <Label htmlFor="express" className="flex-1 cursor-pointer">
               <div className="flex justify-between flex-wrap sm:flex-nowrap">
                 <span className="text-sm md:text-base">Express Shipping</span>
-                <span className="text-sm md:text-base">₹649.99</span>
+                <span className="text-sm md:text-base">₹600</span>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground">
                 Delivery in 1-2 business days

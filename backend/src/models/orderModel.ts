@@ -77,7 +77,6 @@ const OrderSchema = new Schema<IOrder>(
     },
     totalPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true },
-    tax: { type: Number, required: true },
     grandTotal: { type: Number, required: true },
     status: {
       type: String,

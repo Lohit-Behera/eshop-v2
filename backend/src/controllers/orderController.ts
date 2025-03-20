@@ -8,7 +8,7 @@ import { Product } from "../models/productModel";
 import { Cart } from "../models/cartModel";
 
 const orderInitializeRazorpay = asyncHandler(async (req, res) => {
-  const { amount, cart, address } = req.body;
+  const { amount, cart, address, shippingPrice } = req.body;
 
   if (!cart || !cart.products || cart.products.length === 0) {
     return res.status(400).json(new ApiResponse(400, null, "Cart is empty"));
@@ -26,9 +26,8 @@ const orderInitializeRazorpay = asyncHandler(async (req, res) => {
     products: cart.products,
     shippingAddress: address,
     totalPrice: cart.totalPrice,
-    shippingPrice: cart.shippingPrice,
-    tax: cart.tax,
-    grandTotal: cart.totalPrice + cart.shippingPrice + cart.tax,
+    shippingPrice: shippingPrice,
+    grandTotal: cart.totalPrice + shippingPrice,
     status: "Pending",
     paymentStatus: "Pending",
     paymentMethod: "Razorpay",
