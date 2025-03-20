@@ -24,7 +24,7 @@ export type CheckoutData = {
 };
 
 export type Payment = {
-  method: "razorpay" | "paytm" | "paypal";
+  method: "razorpay" | "paytm" | "phonepay";
 };
 
 export default function CheckoutFlow() {

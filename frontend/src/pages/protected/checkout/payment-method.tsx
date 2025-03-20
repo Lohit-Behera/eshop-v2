@@ -1,7 +1,6 @@
-import type React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ShoppingCartIcon as Paypal } from "lucide-react";
+import { ShoppingCartIcon as Paypal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -17,10 +16,10 @@ export default function PaymentMethod({
   onUpdatePayment,
 }: PaymentMethodProps) {
   const [paymentMethod, setPaymentMethod] = useState<
-    "razorpay" | "paytm" | "paypal"
+    "razorpay" | "paytm" | "phonepay"
   >(payment?.method || "razorpay");
 
-  const handleMethodChange = (value: "razorpay" | "paytm" | "paypal") => {
+  const handleMethodChange = (value: "razorpay" | "paytm" | "phonepay") => {
     setPaymentMethod(value);
     onUpdatePayment({ method: value });
   };
@@ -55,11 +54,11 @@ export default function PaymentMethod({
         </div>
 
         <div className="flex items-center space-x-2 border p-3 md:p-4 rounded-md">
-          <RadioGroupItem value="paypal" id="paypal" />
-          <Label htmlFor="paypal" className="flex-1 cursor-pointer">
+          <RadioGroupItem value="cashfree" id="cashfree" />
+          <Label htmlFor="cashfree" className="flex-1 cursor-pointer">
             <div className="flex items-center gap-2">
               <Paypal className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="text-sm md:text-base">PayPal</span>
+              <span className="text-sm md:text-base">CashFree</span>
             </div>
           </Label>
         </div>

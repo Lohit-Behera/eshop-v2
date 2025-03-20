@@ -25,6 +25,7 @@ interface IAddress {
 }
 
 export interface IOrder extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   products: IProduct[];
   shippingAddress: IAddress;
@@ -36,7 +37,7 @@ export interface IOrder extends Document {
   paymentStatus: "Pending" | "Paid" | "Failed";
   paymentMethod:
     | "Razorpay"
-    | "Debit Card"
+    | "PhonePay"
     | "PayPal"
     | "UPI"
     | "Cash on Delivery";
@@ -90,7 +91,7 @@ const OrderSchema = new Schema<IOrder>(
     },
     paymentMethod: {
       type: String,
-      enum: ["Razorpay", "Debit Card", "PayPal", "UPI", "Cash on Delivery"],
+      enum: ["Razorpay", "PhonePay", "PayPal", "UPI", "Cash on Delivery"],
       required: true,
     },
     razorpay: {

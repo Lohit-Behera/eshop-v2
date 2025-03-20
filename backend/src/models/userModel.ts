@@ -12,7 +12,7 @@ export interface IUser extends Document {
   isVerified: boolean;
   token?: string;
   countryCode?: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   otp?: { code: string; expiresAt: Date };
   refreshToken?: string | null;
   comparePassword(password: string): Promise<boolean>;
