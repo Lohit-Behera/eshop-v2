@@ -13,12 +13,7 @@ export const razorpayPayment = async (
   address: any,
   cart: any,
   shippingPrice: number,
-  fetchOrderPlaced: (response: {
-    razorpay_order_id: string;
-    razorpay_payment_id: string;
-    razorpay_signature: string;
-    orderId: string;
-  }) => void
+  navigate: (path: string) => void
 ) => {
   const res = await loadRazorpay(
     "https://checkout.razorpay.com/v1/checkout.js"
@@ -52,19 +47,9 @@ export const razorpayPayment = async (
       name: "Your Company Name",
       description: "Test Transaction",
       order_id: data.data.id,
-      handler: async (response: {
-        razorpay_order_id: string;
-        razorpay_payment_id: string;
-        razorpay_signature: string;
-      }) => {
-        console.log(response);
-
-        fetchOrderPlaced({
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-          orderId: data.data.orderId,
-        });
+      handler: async () => {
+        navigate(`/order/${data.data.orderId}`);
+        toast.success("Payment successful!");
       },
       prefill: {
         name: userDetails?.fullName,

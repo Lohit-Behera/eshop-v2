@@ -31,6 +31,9 @@ const orderInitializeRazorpay = asyncHandler(async (req, res) => {
     status: "Pending",
     paymentStatus: "Pending",
     paymentMethod: "Razorpay",
+    razorpay: {
+      orderId: data.id,
+    },
   });
 
   if (!order) {
@@ -50,50 +53,35 @@ const orderInitializeRazorpay = asyncHandler(async (req, res) => {
     );
 });
 
-const orderPlacedRazorpay = asyncHandler(async (req, res) => {
-  const {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-    orderId,
-  } = req.body;
-  console.log(req.body);
-
-  if (
-    !razorpay_order_id ||
-    !razorpay_payment_id ||
-    !razorpay_signature ||
-    !orderId
-  ) {
-    return res
-      .status(400)
-      .json(new ApiResponse(400, null, "Invalid payment details"));
+const verifyRazorpayPayment = asyncHandler(async (req, res) => {
+  const body = req.body;
+  const orderId = body.payload.payment.entity.order_id;
+  const paymentId = body.payload.payment.entity.id;
+  const order = await Order.findOne({ razorpay: { orderId } });
+  if (!order) {
+    return res.status(400).json(new ApiResponse(400, null, "Order not found"));
   }
-
-  const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-  const expectedSignature = createHmac(
-    "sha256",
-    process.env.RAZORPAY_API_SECRET!
-  )
-    .update(body)
+  // get the signature from header
+  const signature = req.headers["x-razorpay-signature"] as string;
+  console.log(signature);
+  const bodyStringify = JSON.stringify(req.body);
+  const secret = `t6XwvaeMRf5z8kn`;
+  const expectedSignature = createHmac("sha256", secret)
+    .update(bodyStringify)
     .digest("hex");
+  console.log("expectedSignature", expectedSignature);
 
-  if (expectedSignature !== razorpay_signature) {
+  if (expectedSignature !== signature) {
     return res
       .status(400)
       .json(new ApiResponse(400, null, "Payment verification failed"));
   }
 
-  const order = await Order.findById(orderId);
-  if (!order) {
-    return res.status(404).json(new ApiResponse(404, null, "Order not found"));
-  }
-
   order.paymentStatus = "Paid";
   order.razorpay = {
-    orderId: razorpay_order_id,
-    paymentId: razorpay_payment_id,
-    signature: razorpay_signature,
+    orderId: body.payload.payment.entity.order_id,
+    paymentId: body.payload.payment.entity.id,
+    signature: body.payload.payment.entity.signature,
   };
   await order.save();
 
@@ -115,9 +103,9 @@ const orderPlacedRazorpay = asyncHandler(async (req, res) => {
   cart.products = [];
   await cart.save();
 
-  res
+  return res
     .status(200)
-    .json(new ApiResponse(200, order._id, "Order placed successfully"));
+    .json(new ApiResponse(200, null, "Payment verified successfully."));
 });
 
 const getOrder = asyncHandler(async (req, res) => {
@@ -157,7 +145,7 @@ const profileOrderList = asyncHandler(async (req, res) => {
 
 export {
   orderInitializeRazorpay,
-  orderPlacedRazorpay,
+  verifyRazorpayPayment,
   getOrder,
   profileOrderList,
 };

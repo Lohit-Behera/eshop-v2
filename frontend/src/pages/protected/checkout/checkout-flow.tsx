@@ -148,7 +148,8 @@ export default function CheckoutFlow() {
         },
         cart,
         checkoutData.shippingPrice,
-        fetchOrderPlaced
+        fetchOrderPlaced,
+        navigate
       );
     }
   };

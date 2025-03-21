@@ -486,10 +486,6 @@ export default function ProfilePage() {
                             </span>
                             <span>₹{order.shippingPrice.toLocaleString()}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Tax:</span>
-                            <span>₹{order.tax.toLocaleString()}</span>
-                          </div>
                           <div className="flex justify-between font-medium">
                             <span>Total:</span>
                             <span>₹{order.grandTotal.toLocaleString()}</span>

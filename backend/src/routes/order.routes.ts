@@ -1,9 +1,9 @@
 import { Router } from "express";
 import {
   orderInitializeRazorpay,
-  orderPlacedRazorpay,
   getOrder,
   profileOrderList,
+  verifyRazorpayPayment,
 } from "../controllers/orderController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -14,7 +14,8 @@ orderRouter.post(
   authMiddleware,
   orderInitializeRazorpay
 );
-orderRouter.post("/placed/razorpay", authMiddleware, orderPlacedRazorpay);
+orderRouter.post("/verify/razorpay", verifyRazorpayPayment);
+
 orderRouter.get("/get/:orderId", authMiddleware, getOrder);
 orderRouter.get("/profile", authMiddleware, profileOrderList);
 
