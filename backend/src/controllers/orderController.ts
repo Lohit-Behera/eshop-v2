@@ -65,7 +65,7 @@ const verifyRazorpayPayment = asyncHandler(async (req, res) => {
   // get the signature from header
   const signature = req.headers["x-razorpay-signature"] as string;
   const bodyStringify = JSON.stringify(req.body);
-  const secret = `t6XwvaeMRf5z8kn`;
+  const secret = process.env.RAZORPAY_SECRET_WEBHOOK!;
   const expectedSignature = createHmac("sha256", secret)
     .update(bodyStringify)
     .digest("hex");
@@ -177,8 +177,8 @@ const orderInitializeCashFree = asyncHandler(async (req, res) => {
       customer_phone: user.phoneNumber.toString(),
     },
     order_meta: {
-      return_url: `http://localhost:5173/order/${order._id}`,
-      notify_url: `https://4593-117-195-123-138.ngrok-free.app/api/v1/order/verify/cashfree`,
+      return_url: `${process.env.CORS_ORIGIN}/order/${order._id}`,
+      notify_url: `${process.env.CORS_ORIGIN}/api/v1/order/verify/cashfree`,
     },
   };
 
