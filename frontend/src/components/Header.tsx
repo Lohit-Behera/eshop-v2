@@ -1,5 +1,4 @@
 import { Link, useNavigate, useLocation, NavLink } from "react-router-dom";
-import { ModeToggle } from "./mode-toggle";
 import Logo from "@/assets/Logo.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
@@ -34,7 +33,26 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 
+import { useRef, useState } from "react";
+import { motion, MotionConfig } from "motion/react";
+import useClickOutside from "@/hooks/useClickOutside";
+import { ArrowLeft, Search } from "lucide-react";
+import { Input } from "./ui/input";
+
+const transition = {
+  type: "spring",
+  bounce: 0.1,
+  duration: 0.2,
+};
+
 function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(containerRef, () => {
+    setIsOpen(false);
+  });
   const userDetails = useSelector((state: RootState) => state.user.userDetails);
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
   const navigate = useNavigate();
@@ -122,31 +140,92 @@ function Header() {
           </Sheet>
 
           <div className="flex space-x-2">
-            <div className="hidden md:flex space-x-2">
-              <AnimatedBackground
-                defaultValue={
-                  TABS.find((tab) => tab.link === location.pathname)?.label
-                }
-                className="rounded-lg bg-muted "
-                transition={{
-                  type: "spring",
-                  bounce: 0.3,
-                  duration: 0.6,
-                }}
-              >
-                {TABS.map((tab) => (
-                  <Link
-                    key={tab.label}
-                    to={tab.link}
-                    data-id={tab.label}
-                    type="button"
-                    className="flex items-center justify-center text-zinc-500 transition-colors duration-100 focus-visible:outline-2 data-[checked=true]:text-foreground"
-                    onClick={() => navigate(tab.link)}
+            <div className="hidden md:flex space-x-2 justify-end">
+              <MotionConfig transition={transition}>
+                <div className="" ref={containerRef}>
+                  <motion.div
+                    animate={{
+                      // @todo: here I want to remove the width
+                      width: isOpen ? "600px" : "500px",
+                    }}
+                    initial={false}
                   >
-                    {tab.icon}
-                  </Link>
-                ))}
-              </AnimatedBackground>
+                    <div className="overflow-hidden p-2">
+                      {!isOpen ? (
+                        <div className="flex space-x-2">
+                          <AnimatedBackground
+                            defaultValue={
+                              TABS.find((tab) => tab.link === location.pathname)
+                                ?.label
+                            }
+                            className="rounded-lg bg-muted "
+                            transition={{
+                              type: "spring",
+                              bounce: 0.3,
+                              duration: 0.6,
+                            }}
+                          >
+                            {TABS.map((tab) => (
+                              <Link
+                                key={tab.label}
+                                to={tab.link}
+                                data-id={tab.label}
+                                type="button"
+                                className="flex items-center justify-center text-zinc-500 transition-colors duration-100 focus-visible:outline-2 data-[checked=true]:text-foreground"
+                                onClick={() => navigate(tab.link)}
+                              >
+                                {tab.icon}
+                              </Link>
+                            ))}
+                          </AnimatedBackground>
+                          <Button
+                            onClick={() => setIsOpen(true)}
+                            size={"icon"}
+                            variant={"outline"}
+                          >
+                            <Search className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => setIsOpen(false)}
+                            size="icon"
+                            variant={"ghost"}
+                            className="my-auto"
+                          >
+                            <ArrowLeft className="h-5 w-5" />
+                          </Button>
+                          <div className="relative w-full flex space-x-2">
+                            <Input
+                              className="h-9 w-full"
+                              placeholder="Search"
+                              onChange={(e) => setSearch(e.target.value)}
+                              onKeyUp={(e) => {
+                                if (e.key === "Enter") {
+                                  if (search) {
+                                    navigate(`/products/?search=${search}`);
+                                  }
+                                }
+                              }}
+                            />
+                            <Button
+                              size="icon"
+                              onClick={() => {
+                                if (search) {
+                                  navigate(`/products/?search=${search}`);
+                                }
+                              }}
+                            >
+                              <Search className="w-5 h-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                </div>
+              </MotionConfig>
             </div>
             {userInfo && (
               <DropdownMenu>
