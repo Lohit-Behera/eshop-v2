@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -11,7 +11,15 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "16kb" }));
+// Apply JSON parsing to all routes EXCEPT the CashFree webhook
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/v1/order/verify/cashfree") {
+    next();
+  } else {
+    express.json({ limit: "16kb" })(req, res, next);
+  }
+});
+
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 

@@ -14,6 +14,7 @@ import { razorpayPayment } from "@/components/payments/razorpay";
 import { useDispatchWithToast } from "@/hooks/dispatch";
 import { fetchRazorpayOrderPlaced } from "@/feature/orderSlice";
 import { useNavigate } from "react-router-dom";
+import { cashFreePayment } from "@/components/payments/cashfree";
 // Types for our checkout data
 export type CheckoutData = {
   products: Product[];
@@ -24,7 +25,7 @@ export type CheckoutData = {
 };
 
 export type Payment = {
-  method: "razorpay" | "paytm" | "phonepay";
+  method: "razorpay" | "paytm" | "cashfree";
 };
 
 export default function CheckoutFlow() {
@@ -43,6 +44,7 @@ export default function CheckoutFlow() {
     payment: { method: "razorpay" } as Payment,
     totalPrice: cart.totalPrice,
   });
+  console.log("payment", checkoutData.payment);
 
   useEffect(() => {
     if (addresses.length > 0 && cart.totalPrice > 0) {
@@ -125,31 +127,45 @@ export default function CheckoutFlow() {
     },
   });
   const handlePlaceOrder = () => {
+    const address = {
+      _id: checkoutData.address?._id,
+      name: checkoutData.address?.name,
+      type: checkoutData.address?.type,
+      addressLine1: checkoutData.address?.addressLine1,
+      addressLine2: checkoutData.address?.addressLine2,
+      city: checkoutData.address?.city,
+      state: checkoutData.address?.state,
+      country: checkoutData.address?.country,
+      pinCode: checkoutData.address?.pinCode,
+      phone: checkoutData.address?.phone,
+    };
     // Redirect to order confirmation page or dashboard
     if (
       checkoutData.payment &&
       checkoutData.payment.method === "razorpay" &&
       userDetails
     ) {
+      console.log("Razorpay payment");
+
       razorpayPayment(
         cart.totalPrice + checkoutData.shippingPrice,
         userDetails,
-        {
-          _id: checkoutData.address?._id,
-          name: checkoutData.address?.name,
-          type: checkoutData.address?.type,
-          addressLine1: checkoutData.address?.addressLine1,
-          addressLine2: checkoutData.address?.addressLine2,
-          city: checkoutData.address?.city,
-          state: checkoutData.address?.state,
-          country: checkoutData.address?.country,
-          pinCode: checkoutData.address?.pinCode,
-          phone: checkoutData.address?.phone,
-        },
+        address,
         cart,
         checkoutData.shippingPrice,
-        fetchOrderPlaced,
         navigate
+      );
+    } else if (
+      checkoutData.payment &&
+      checkoutData.payment.method === "cashfree" &&
+      userDetails
+    ) {
+      console.log("Cashfree payment");
+      cashFreePayment(
+        cart.totalPrice + checkoutData.shippingPrice,
+        address,
+        cart,
+        checkoutData.shippingPrice
       );
     }
   };

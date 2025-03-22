@@ -4,8 +4,11 @@ import {
   getOrder,
   profileOrderList,
   verifyRazorpayPayment,
+  verifyCashFreePayment,
+  orderInitializeCashFree,
 } from "../controllers/orderController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { rawBodyMiddleware } from "../middlewares/rawBodyMiddleware";
 
 const orderRouter = Router();
 
@@ -18,5 +21,12 @@ orderRouter.post("/verify/razorpay", verifyRazorpayPayment);
 
 orderRouter.get("/get/:orderId", authMiddleware, getOrder);
 orderRouter.get("/profile", authMiddleware, profileOrderList);
+
+orderRouter.post(
+  "/initialize/cashfree",
+  authMiddleware,
+  orderInitializeCashFree
+);
+orderRouter.post("/verify/cashfree", rawBodyMiddleware, verifyCashFreePayment);
 
 export default orderRouter;

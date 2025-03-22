@@ -38,13 +38,19 @@ export interface IOrder extends Document {
   paymentMethod:
     | "Razorpay"
     | "PhonePay"
-    | "PayPal"
+    | "CashFree"
     | "UPI"
     | "Cash on Delivery";
   razorpay?: {
     orderId: string;
     paymentId: string;
     signature: string;
+  };
+  cashFree?: {
+    orderId?: string;
+    paymentId?: string;
+    paymentSessionId?: string;
+    signature?: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -91,12 +97,18 @@ const OrderSchema = new Schema<IOrder>(
     },
     paymentMethod: {
       type: String,
-      enum: ["Razorpay", "PhonePay", "PayPal", "UPI", "Cash on Delivery"],
+      enum: ["Razorpay", "PhonePay", "CashFree", "UPI", "Cash on Delivery"],
       required: true,
     },
     razorpay: {
       orderId: { type: String },
       paymentId: { type: String },
+      signature: { type: String },
+    },
+    cashFree: {
+      orderId: { type: String },
+      paymentId: { type: String },
+      paymentSessionId: { type: String },
       signature: { type: String },
     },
   },

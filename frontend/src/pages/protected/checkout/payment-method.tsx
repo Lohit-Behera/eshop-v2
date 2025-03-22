@@ -16,10 +16,10 @@ export default function PaymentMethod({
   onUpdatePayment,
 }: PaymentMethodProps) {
   const [paymentMethod, setPaymentMethod] = useState<
-    "razorpay" | "paytm" | "phonepay"
+    "razorpay" | "paytm" | "cashfree"
   >(payment?.method || "razorpay");
 
-  const handleMethodChange = (value: "razorpay" | "paytm" | "phonepay") => {
+  const handleMethodChange = (value: "razorpay" | "paytm" | "cashfree") => {
     setPaymentMethod(value);
     onUpdatePayment({ method: value });
   };
