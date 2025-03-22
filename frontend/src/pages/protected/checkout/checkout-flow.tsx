@@ -25,7 +25,7 @@ export type CheckoutData = {
 };
 
 export type Payment = {
-  method: "razorpay" | "paytm" | "cashfree";
+  method: "razorpay" | "cashfree";
 };
 
 export default function CheckoutFlow() {
@@ -44,7 +44,6 @@ export default function CheckoutFlow() {
     payment: { method: "razorpay" } as Payment,
     totalPrice: cart.totalPrice,
   });
-  console.log("payment", checkoutData.payment);
 
   useEffect(() => {
     if (addresses.length > 0 && cart.totalPrice > 0) {
@@ -111,21 +110,6 @@ export default function CheckoutFlow() {
     if (step === 2 && !checkoutData.payment) return true;
     return false;
   };
-  const fetchOrderPlaced = useDispatchWithToast(fetchRazorpayOrderPlaced, {
-    loadingMessage: "Placing order...",
-    getSuccessMessage(data) {
-      return data.message || `Order placed successfully`;
-    },
-    getErrorMessage(error) {
-      return (
-        error?.message || error || "Something went wrong while placing order"
-      );
-    },
-    onSuccess: (data) => {
-      // Redirect to order page
-      navigate(`/order/${data.data}`);
-    },
-  });
   const handlePlaceOrder = () => {
     const address = {
       _id: checkoutData.address?._id,
@@ -145,8 +129,6 @@ export default function CheckoutFlow() {
       checkoutData.payment.method === "razorpay" &&
       userDetails
     ) {
-      console.log("Razorpay payment");
-
       razorpayPayment(
         cart.totalPrice + checkoutData.shippingPrice,
         userDetails,
@@ -160,7 +142,6 @@ export default function CheckoutFlow() {
       checkoutData.payment.method === "cashfree" &&
       userDetails
     ) {
-      console.log("Cashfree payment");
       cashFreePayment(
         cart.totalPrice + checkoutData.shippingPrice,
         address,
@@ -191,7 +172,7 @@ export default function CheckoutFlow() {
                       {i + 1}
                     </div>
                     <span
-                      className={`mt-1 text-xs md:text-sm text-center ${
+                      className={`mt-1 text-xs md:text-sm text-center line-clamp-1 ${
                         i <= step
                           ? "text-primary font-medium"
                           : "text-muted-foreground"
