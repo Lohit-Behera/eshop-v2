@@ -35,12 +35,7 @@ export interface IOrder extends Document {
   grandTotal: number;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
   paymentStatus: "Pending" | "Paid" | "Failed";
-  paymentMethod:
-    | "Razorpay"
-    | "PhonePay"
-    | "CashFree"
-    | "UPI"
-    | "Cash on Delivery";
+  paymentMethod: "Razorpay" | "CashFree";
   razorpay?: {
     orderId: string;
     paymentId: string;
@@ -97,7 +92,7 @@ const OrderSchema = new Schema<IOrder>(
     },
     paymentMethod: {
       type: String,
-      enum: ["Razorpay", "PhonePay", "CashFree", "UPI", "Cash on Delivery"],
+      enum: ["Razorpay", "CashFree"],
       required: true,
     },
     razorpay: {
