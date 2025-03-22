@@ -318,8 +318,17 @@ const uniqueBrands = asyncHandler(async (req, res) => {
 });
 
 const getFilteredProducts = asyncHandler(async (req, res) => {
-  const { search, category, brand, priceMin, priceMax, stock, discount, sort } =
-    req.query;
+  const {
+    search,
+    category,
+    brand,
+    priceMin,
+    priceMax,
+    stock,
+    discount,
+    sort,
+    subCategory,
+  } = req.query;
 
   // Build match conditions for the aggregation
   const matchConditions: any = { isPublic: true };
@@ -337,6 +346,14 @@ const getFilteredProducts = asyncHandler(async (req, res) => {
   if (category) {
     const categories = Array.isArray(category) ? category : [category];
     matchConditions.category = { $in: categories };
+  }
+
+  // Apply subCategory filter (handle multiple subCategories)
+  if (subCategory) {
+    const subCategories = Array.isArray(subCategory)
+      ? subCategory
+      : [subCategory];
+    matchConditions.subCategory = { $in: subCategories };
   }
 
   // Apply brand filter (handle multiple brands)

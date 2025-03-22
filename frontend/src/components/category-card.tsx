@@ -66,8 +66,7 @@ export function CategoryCard({
             <img
               src={category.thumbnail || "/placeholder.svg"}
               alt={category.name}
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="w-full h-80 object-cover"
             />
           </motion.div>
           <ProgressiveBlur
@@ -109,7 +108,7 @@ export function CategoryCard({
             <div className="flex flex-wrap gap-2 mb-4">
               {category.subCategories.map((subCategory) => (
                 <Link
-                  to={`/categories/${category._id}/subcategory/${subCategory._id}`}
+                  to={`/products/?subCategory=${subCategory.name}`}
                   key={subCategory._id}
                 >
                   <Badge

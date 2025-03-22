@@ -1,4 +1,3 @@
-import { UserDetails } from "@/feature/userSlice";
 import { load } from "@cashfreepayments/cashfree-js";
 import axios from "axios";
 import { toast } from "sonner";
