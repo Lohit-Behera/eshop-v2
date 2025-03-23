@@ -97,7 +97,7 @@ function Header() {
   ];
   return (
     <>
-      <header className="z-20 w-full sticky top-0 p-2 backdrop-blur bg-background/50">
+      <header className="z-20 w-full sticky top-0 p-2 backdrop-blur bg-background/80 ">
         <nav className="flex justify-between space-x-1">
           <Link to={"/"} className="hidden md:block">
             <img src={Logo} alt="logo" className="w-10 h-10" />

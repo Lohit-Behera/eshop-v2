@@ -88,7 +88,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             {product.stock > 0 ? (
-              <span className="text-green-600">
+              <span
+                className={`${
+                  product.stock > 5 ? "text-green-600" : "text-amber-500"
+                }`}
+              >
                 In Stock ({product.stock} left)
               </span>
             ) : (

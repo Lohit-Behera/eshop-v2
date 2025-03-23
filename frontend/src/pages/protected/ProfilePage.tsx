@@ -129,7 +129,9 @@ export default function ProfilePage() {
   const profileOrderStatus = useSelector(
     (state: RootState) => state.order.profileOrderStatus
   );
-  console.log(profileOrderStatus);
+  const profileOrderError = useSelector(
+    (state: RootState) => state.order.profileOrderError
+  );
 
   const form = useForm<z.infer<typeof addressSchema>>({
     resolver: zodResolver(addressSchema),
@@ -302,7 +304,7 @@ export default function ProfilePage() {
             <CardFooter className="pt-3">
               <Button
                 variant="outline"
-                className="w-full justify-start text-destructive"
+                className="w-full justify-start text-destructive dark:text-red-500"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
@@ -400,7 +402,7 @@ export default function ProfilePage() {
           )}
 
           {activeTab === "orders" && (
-            <Card>
+            <Card className="min-h-[75vh]">
               <CardHeader>
                 <CardTitle>Order History</CardTitle>
                 <CardDescription>View and track your orders</CardDescription>
@@ -412,119 +414,149 @@ export default function ProfilePage() {
                       <Loader2 className="absolute w-[50px] h-[50px] top-1/2 left-1/2 animate-spin" />
                     </div>
                   )}
-                  {profileOrder.docs.map((order, index) => (
-                    <motion.div
-                      key={order._id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="border rounded-lg p-4"
-                    >
-                      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
-                        <div>
-                          <p className="font-medium">
-                            Order #{order._id.substring(order._id.length - 6)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Placed on{" "}
-                            {new Date(order.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge
-                            variant={
-                              order.status === "Delivered"
-                                ? "default"
-                                : order.status === "Shipped"
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {order.status}
-                          </Badge>
-                          <Badge
-                            variant={
-                              order.paymentStatus === "Paid"
-                                ? "success"
-                                : "destructive"
-                            }
-                          >
-                            {order.paymentStatus}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Products in this order */}
-                      <div className="space-y-4">
-                        {order.products.map((product) => (
-                          <div
-                            key={product.productId}
-                            className="flex items-center gap-4"
-                          >
-                            <div className="h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
-                              <img
-                                src={product.thumbnail || "/placeholder.svg"}
-                                alt={product.name}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm md:text-base line-clamp-2">
-                                {product.name}
+                  {profileOrderStatus === "failed" ? (
+                    <>
+                      {profileOrderError === "No orders found" ? (
+                        <p className="text-sm text-muted-foreground text-center">
+                          No orders found.
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center">
+                          Something went wrong. Please try again.
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {profileOrder.docs.map((order, index) => (
+                        <motion.div
+                          key={order._id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="border rounded-lg p-4"
+                        >
+                          <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
+                            <div>
+                              <p className="font-medium">
+                                Order #
+                                {order._id.substring(order._id.length - 6)}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                Qty: {product.quantity}
+                                Placed on{" "}
+                                {new Date(order.createdAt).toLocaleDateString()}
                               </p>
                             </div>
-                            <div className="text-right">
-                              <p className="font-medium">
-                                ₹{product.sellingPrice.toLocaleString()}
-                              </p>
+                            <div className="flex flex-wrap gap-2">
+                              <Badge
+                                variant={
+                                  order.status === "Delivered"
+                                    ? "default"
+                                    : order.status === "Shipped"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                              >
+                                {order.status}
+                              </Badge>
+                              <Badge
+                                variant={
+                                  order.paymentStatus === "Paid"
+                                    ? "success"
+                                    : "destructive"
+                                }
+                              >
+                                {order.paymentStatus}
+                              </Badge>
                             </div>
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Order summary */}
-                      <div className="mt-4 border-t pt-4">
-                        <div className="space-y-1 text-xs sm:text-sm ">
-                          <div className="flex justify-between ">
-                            <span className="text-muted-foreground">
-                              Subtotal:
-                            </span>
-                            <span>₹{order.totalPrice.toLocaleString()}</span>
+                          {/* Products in this order */}
+                          <div className="space-y-4">
+                            {order.products.map((product) => (
+                              <div
+                                key={product.productId}
+                                className="flex items-center gap-4"
+                              >
+                                <div className="h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
+                                  <img
+                                    src={
+                                      product.thumbnail || "/placeholder.svg"
+                                    }
+                                    alt={product.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm md:text-base line-clamp-2">
+                                    {product.name}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Qty: {product.quantity}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-medium">
+                                    ₹{product.sellingPrice.toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              Shipping:
-                            </span>
-                            <span>₹{order.shippingPrice.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between font-medium">
-                            <span>Total:</span>
-                            <span>₹{order.grandTotal.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div className="mt-4 flex justify-between items-center">
-                        <span className=" text-xs sm:text-sm  text-muted-foreground">
-                          Payment via {order.paymentMethod}
-                        </span>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/order/${order._id}`}>View Details</Link>
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
+                          {/* Order summary */}
+                          <div className="mt-4 border-t pt-4">
+                            <div className="space-y-1 text-xs sm:text-sm ">
+                              <div className="flex justify-between ">
+                                <span className="text-muted-foreground">
+                                  Subtotal:
+                                </span>
+                                <span>
+                                  ₹{order.totalPrice.toLocaleString()}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  Shipping:
+                                </span>
+                                <span>
+                                  ₹{order.shippingPrice.toLocaleString()}
+                                </span>
+                              </div>
+                              <div className="flex justify-between font-medium">
+                                <span>Total:</span>
+                                <span>
+                                  ₹{order.grandTotal.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className=" text-xs sm:text-sm  text-muted-foreground">
+                              Payment via {order.paymentMethod}
+                            </span>
+                            <Button variant="outline" size="sm" asChild>
+                              <Link to={`/order/${order._id}`}>
+                                View Details
+                              </Link>
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Paginator
-                  currentPage={profileOrder.page}
-                  totalPages={profileOrder.totalPages}
-                  showPreviousNext={true}
-                />
+                {profileOrderStatus === "succeeded" &&
+                  profileOrder.totalPages > 1 && (
+                    <Paginator
+                      currentPage={profileOrder.page}
+                      totalPages={profileOrder.totalPages}
+                      showPreviousNext={true}
+                    />
+                  )}
               </CardFooter>
             </Card>
           )}

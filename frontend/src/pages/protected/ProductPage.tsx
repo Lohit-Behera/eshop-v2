@@ -209,7 +209,11 @@ function ProductPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
               >
-                <Button className="w-full mb-4" onClick={handleAddToCart}>
+                <Button
+                  className="w-full mb-4"
+                  onClick={handleAddToCart}
+                  disabled={buttonLoading || product.stock === 0}
+                >
                   {buttonLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
