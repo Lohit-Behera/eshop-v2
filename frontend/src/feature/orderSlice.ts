@@ -125,7 +125,7 @@ export const fetchGetOrder = createAsyncThunk(
 
 export const fetchProfileOrder = createAsyncThunk(
   "order/profileOrder",
-  async (_, { rejectWithValue }) => {
+  async (query: string, { rejectWithValue }) => {
     try {
       const config = {
         headers: {
@@ -134,7 +134,7 @@ export const fetchProfileOrder = createAsyncThunk(
         withCredentials: true,
       };
       const { data } = await axios.get(
-        `${baseUrl}/api/v1/order/profile`,
+        `${baseUrl}/api/v1/order/profile?${query}`,
         config
       );
       return data;

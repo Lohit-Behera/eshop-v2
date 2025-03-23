@@ -5,7 +5,6 @@ import {
   Loader2,
   LogOut,
   MapPin,
-  Package,
   Plus,
   Settings,
   ShoppingBag,
@@ -40,10 +39,8 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -51,7 +48,6 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -63,6 +59,8 @@ import { TextMorph } from "@/components/ui/text-morph";
 import { fetchProfileOrder } from "@/feature/orderSlice";
 import { Link } from "react-router-dom";
 import { ModeToggle } from "@/components/mode-toggle";
+import Paginator from "@/components/paginator";
+import { useSearchParams } from "react-router-dom";
 
 const addressSchema = z.object({
   name: z
@@ -103,6 +101,7 @@ const addressSchema = z.object({
 
 export default function ProfilePage() {
   const userDetails = useSelector((state: RootState) => state.user.userDetails);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("profile");
   const [user, setUser] = useState({
     fullName: userDetails?.fullName || "",
@@ -127,6 +126,11 @@ export default function ProfilePage() {
   const profileOrder = useSelector(
     (state: RootState) => state.order.profileOrder.data
   );
+  const profileOrderStatus = useSelector(
+    (state: RootState) => state.order.profileOrderStatus
+  );
+  console.log(profileOrderStatus);
+
   const form = useForm<z.infer<typeof addressSchema>>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -147,8 +151,13 @@ export default function ProfilePage() {
   const getProfileOrders = useAsyncDispatch(fetchProfileOrder);
 
   useEffect(() => {
+    getProfileOrders(searchParams.toString());
+    console.log(searchParams.toString());
+  }, [searchParams]);
+
+  useEffect(() => {
     allAddress();
-    getProfileOrders();
+    getProfileOrders("");
   }, []);
   const createAddress = useDispatchWithToast(fetchCreateAddress, {
     loadingMessage: "Adding Address...",
@@ -397,7 +406,12 @@ export default function ProfilePage() {
                 <CardDescription>View and track your orders</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
+                <div className="relative space-y-6">
+                  {profileOrderStatus === "loading" && (
+                    <div className="absolute min-h-[1500px] h-full w-full rounded-md bg-background/50 filter backdrop-blur-sm animate-pulse">
+                      <Loader2 className="absolute w-[50px] h-[50px] top-1/2 left-1/2 animate-spin" />
+                    </div>
+                  )}
                   {profileOrder.docs.map((order, index) => (
                     <motion.div
                       key={order._id}
@@ -506,7 +520,11 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Button variant="outline">View All Orders</Button>
+                <Paginator
+                  currentPage={profileOrder.page}
+                  totalPages={profileOrder.totalPages}
+                  showPreviousNext={true}
+                />
               </CardFooter>
             </Card>
           )}

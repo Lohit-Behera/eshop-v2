@@ -171,7 +171,7 @@ function Header() {
                                 to={tab.link}
                                 data-id={tab.label}
                                 type="button"
-                                className="flex items-center justify-center text-zinc-500 transition-colors duration-100 focus-visible:outline-2 data-[checked=true]:text-foreground"
+                                className="flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors duration-100 focus-visible:outline-2 data-[checked=true]:text-foreground"
                                 onClick={() => navigate(tab.link)}
                               >
                                 {tab.icon}
@@ -200,6 +200,7 @@ function Header() {
                             <Input
                               className="h-9 w-full"
                               placeholder="Search"
+                              value={search}
                               onChange={(e) => setSearch(e.target.value)}
                               onKeyUp={(e) => {
                                 if (e.key === "Enter") {
