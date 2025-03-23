@@ -11,6 +11,7 @@ import {
   Clock,
   AlertCircle,
   Loader2,
+  Download,
 } from "lucide-react";
 import {
   Card,
@@ -33,7 +34,9 @@ import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useAsyncDispatch } from "@/hooks/dispatch";
-import { fetchGetOrder } from "@/feature/orderSlice";
+import { fetchGetOrder, Order } from "@/feature/orderSlice";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Format currency
 const formatCurrency = (amount: number) => {
@@ -47,6 +50,136 @@ const formatCurrency = (amount: number) => {
 // Format date
 const formatDate = (dateString: string) => {
   return format(new Date(dateString), "PPP");
+};
+
+// The PDF generation function
+const generateInvoicePDF = (orderData: Order): void => {
+  // Create a new PDF document
+  const doc = new jsPDF();
+
+  // Add company logo/header
+  doc.setFontSize(20);
+  doc.setTextColor(40, 40, 40);
+  doc.text("EShop", 105, 20, { align: "center" });
+
+  // Add invoice title
+  doc.setFontSize(16);
+  doc.text("INVOICE", 105, 30, { align: "center" });
+
+  // Add order information
+  doc.setFontSize(10);
+  doc.setTextColor(80, 80, 80);
+
+  // Left side information
+  doc.text("Bill To:", 20, 50);
+  doc.text(`${orderData.shippingAddress.name}`, 20, 55);
+  doc.text(`${orderData.shippingAddress.addressLine1}`, 20, 60);
+
+  let currentY = 65;
+  if (orderData.shippingAddress.addressLine2) {
+    doc.text(`${orderData.shippingAddress.addressLine2}`, 20, currentY);
+    currentY += 5;
+  }
+
+  doc.text(
+    `${orderData.shippingAddress.city}, ${orderData.shippingAddress.state}`,
+    20,
+    currentY
+  );
+  doc.text(
+    `${orderData.shippingAddress.country} - ${orderData.shippingAddress.pinCode}`,
+    20,
+    currentY + 5
+  );
+  doc.text(`Phone: ${orderData.shippingAddress.phone}`, 20, currentY + 10);
+
+  // Right side information
+  doc.text(
+    `Invoice Number: INV-${orderData._id.substring(orderData._id.length - 8)}`,
+    130,
+    50
+  );
+  doc.text(
+    `Order Number: #${orderData._id.substring(orderData._id.length - 8)}`,
+    130,
+    55
+  );
+  doc.text(`Order Date: ${formatDate(orderData.createdAt)}`, 130, 60);
+  doc.text(`Payment Method: ${orderData.paymentMethod}`, 130, 65);
+  doc.text(`Payment Status: ${orderData.paymentStatus}`, 130, 70);
+
+  // Create product table
+  const tableColumn: string[] = ["Item", "Price", "Qty", "Total"];
+  const tableRows: (string | number)[][] = [];
+
+  // Add product rows
+  orderData.products.forEach((product) => {
+    const productData: (string | number)[] = [
+      product.name,
+      formatCurrency(product.sellingPrice).replace("₹", "Rs."),
+      product.quantity,
+      formatCurrency(product.totalPrice).replace("₹", "Rs."),
+    ];
+    tableRows.push(productData);
+  });
+
+  // Generate the table
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 90,
+    theme: "grid",
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+    },
+    headStyles: {
+      fillColor: [66, 66, 66],
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+    },
+  });
+
+  // Get the position after the product table
+  const docWithAutoTable = doc as unknown as {
+    lastAutoTable: { finalY: number };
+  };
+  const finalY = docWithAutoTable.lastAutoTable.finalY + 10;
+
+  // Summary table
+  autoTable(doc, {
+    body: [
+      ["Subtotal:", formatCurrency(orderData.totalPrice).replace("₹", "Rs.")],
+      [
+        "Shipping:",
+        formatCurrency(orderData.shippingPrice).replace("₹", "Rs."),
+      ],
+      ["Total:", formatCurrency(orderData.grandTotal).replace("₹", "Rs.")],
+    ],
+    startY: finalY,
+    theme: "plain",
+    styles: {
+      fontSize: 9,
+    },
+    columnStyles: {
+      0: { cellWidth: 150, fontStyle: "bold" },
+      1: { halign: "right" },
+    },
+  });
+
+  // Add footer text
+  const footerY = docWithAutoTable.lastAutoTable.finalY + 20;
+  doc.setFontSize(8);
+  doc.text("Thank you for your purchase!", 105, footerY, { align: "center" });
+  doc.text(
+    "For any questions regarding this invoice, please contact support@eshop.com",
+    105,
+    footerY + 5,
+    { align: "center" }
+  );
+
+  // Save the PDF
+  doc.save(`Invoice-${orderData._id.substring(orderData._id.length - 8)}.pdf`);
 };
 
 // Status badge component
@@ -358,10 +491,6 @@ export default function OrderPage() {
                           <span>Shipping</span>
                           <span>{formatCurrency(orderData.shippingPrice)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Tax</span>
-                          <span>{formatCurrency(orderData.tax)}</span>
-                        </div>
                         <Separator />
                         <div className="flex justify-between font-medium">
                           <span>Total</span>
@@ -489,7 +618,12 @@ export default function OrderPage() {
                     <Button variant="outline" className="w-full sm:w-auto">
                       Track Order
                     </Button>
-                    <Button variant="outline" className="w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      className="w-full sm:w-auto flex items-center gap-2"
+                      onClick={() => generateInvoicePDF(orderData)}
+                    >
+                      <Download className="h-4 w-4" />
                       Download Invoice
                     </Button>
                     <Button className="w-full sm:w-auto">
