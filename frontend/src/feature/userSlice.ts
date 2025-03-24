@@ -10,6 +10,10 @@ export interface UserDetails {
   avatar: string;
   role: string;
   isVerified: boolean;
+  preferences: {
+    emailNotifications: boolean;
+    orderUpdates: boolean;
+  };
   phone?: string;
 }
 

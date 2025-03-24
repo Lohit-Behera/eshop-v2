@@ -127,7 +127,7 @@ function Header() {
                         <Button
                           variant={isActive ? "default" : "ghost"}
                           size={"sm"}
-                          className="w-full"
+                          className="w-full justify-start"
                         >
                           {tab.icon}
                         </Button>

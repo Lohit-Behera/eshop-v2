@@ -33,6 +33,8 @@ const singUp = asyncHandler(async (req, res) => {
     email: Joi.string().email().required(),
     password: Joi.string().required(),
     confirmPassword: Joi.string().required(),
+    countryCode: Joi.string().required(),
+    phoneNumber: Joi.string().required(),
   });
 
   // Validate request body
@@ -60,34 +62,13 @@ const singUp = asyncHandler(async (req, res) => {
       );
   }
 
-  //get avatar from the request
-  const avatar = req.file;
-  if (!avatar) {
-    return res
-      .status(400)
-      .json(new ApiResponse(400, null, "Avatar is required"));
-  }
-
-  //upload avatar to cloudinary
-  const avatarUrl = await uploadFile(avatar, "avatar");
-  if (!avatarUrl || typeof avatarUrl !== "string") {
-    return res
-      .status(500)
-      .json(
-        new ApiResponse(
-          500,
-          null,
-          "Something went wrong while uploading avatar."
-        )
-      );
-  }
-
   //create user
   const user = await User.create({
     fullName: value.fullName,
     email: value.email,
     password: value.password,
-    avatar: avatarUrl,
+    countryCode: value.countryCode,
+    phoneNumber: value.phoneNumber,
   });
 
   const createdUser = await User.findById(user._id);

@@ -704,11 +704,19 @@ export default function ProfilePage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="email-notifs">Email notifications</Label>
-                      <Switch id="email-notifs" defaultChecked />
+                      <Switch
+                        id="email-notifs"
+                        defaultChecked={
+                          userDetails?.preferences.emailNotifications
+                        }
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="order-updates">Order updates</Label>
-                      <Switch id="order-updates" defaultChecked />
+                      <Switch
+                        id="order-updates"
+                        defaultChecked={userDetails?.preferences.orderUpdates}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="marketing">Marketing emails</Label>

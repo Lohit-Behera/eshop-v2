@@ -41,7 +41,6 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String,
-      required: true,
     },
     role: {
       type: String,
@@ -59,7 +58,7 @@ const userSchema = new Schema(
       type: String,
     },
     phoneNumber: {
-      type: Number,
+      type: String,
       unique: true,
       sparse: true,
     },
@@ -70,6 +69,16 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
       default: null,
+    },
+    preferences: {
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      orderUpdates: {
+        type: Boolean,
+        default: true,
+      },
     },
   },
   {

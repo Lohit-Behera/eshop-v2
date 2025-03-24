@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -36,6 +35,9 @@ import { useLayoutEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { GlowInput } from "@/components/ui/glow-input";
+import PhoneInput from "@/components/phone-input";
+
+const phoneRegex = new RegExp("^[6-9]\\d{9}$");
 
 const FormSchema = z
   .object({
@@ -49,20 +51,7 @@ const FormSchema = z
     confirmPassword: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
-    avatar: z
-      .any()
-      .refine((file) => file instanceof File, {
-        message: "Avatar is required.",
-      })
-      .refine((file) => file?.size <= 3 * 1024 * 1024, {
-        message: "Avatar size must be less than 5MB.",
-      })
-      .refine(
-        (file) => ["image/jpeg", "image/png", "image/gif"].includes(file?.type),
-        {
-          message: "Only .jpg, .png, and .gif formats are supported.",
-        }
-      ),
+    phoneNumber: z.string().regex(phoneRegex, "Invalid Phone Number!"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match.",
@@ -76,6 +65,10 @@ const FormSchema = z
 
 function SignUpPage() {
   const [open, setOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState({
+    code: "IN",
+    dialCode: "+91",
+  });
   const navigate = useNavigate();
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
 
@@ -92,15 +85,14 @@ function SignUpPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      avatar: undefined,
+      phoneNumber: "",
     },
   });
 
   const signUp = useDispatchWithToast(fetchSignUp, {
     loadingMessage: "Account creating...",
-    getSuccessMessage: (data: any) =>
-      data.message || "Account created successfully",
-    getErrorMessage: (error: any) =>
+    getSuccessMessage: (data) => data.message || "Account created successfully",
+    getErrorMessage: (error) =>
       error.message ||
       error ||
       "Failed to create account. Please try again later.",
@@ -119,7 +111,8 @@ function SignUpPage() {
       email: data.email,
       password: data.password,
       confirmPassword: data.confirmPassword,
-      avatar: data.avatar,
+      phoneNumber: data.phoneNumber,
+      countryCode: selectedCountry.dialCode,
     });
   }
 
@@ -153,7 +146,7 @@ function SignUpPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="mx-auto max-w-[350px] min-w-[350px]">
+      <Card className="mx-auto max-w-[600px] min-w-[450px]">
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>
@@ -191,17 +184,17 @@ function SignUpPage() {
               />
               <FormField
                 control={form.control}
-                name="avatar"
+                name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Avatar</FormLabel>
+                    <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <GlowInput
-                        placeholder="Avatar"
-                        type="file"
-                        onChange={(e) =>
-                          field.onChange(e.target.files?.[0] || null)
-                        }
+                      <PhoneInput
+                        onPhoneNumberChange={field.onChange}
+                        phoneNumber={field.value}
+                        selectedCountry={selectedCountry}
+                        setSelectedCountry={setSelectedCountry}
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

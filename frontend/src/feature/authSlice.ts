@@ -11,14 +11,15 @@ export const fetchSignUp = createAsyncThunk(
       email: string;
       password: string;
       confirmPassword: string;
-      avatar: File;
+      phoneNumber: string;
+      countryCode: string;
     },
     { rejectWithValue }
   ) => {
     try {
       const config = {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
       };
       const { data } = await axios.post(

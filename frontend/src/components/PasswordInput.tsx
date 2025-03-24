@@ -41,12 +41,12 @@ const PasswordInput = forwardRef<
     >
       <div
         className={cn(
-          "relative flex h-10 w-full rounded-md border border-input bg-background shadow-sm transition-colors placeholder:text-foreground focus-within:ring-2 ring-ring ring-neutral-400 dark:ring-neutral-600",
+          "relative flex h-10 w-full rounded-md border border-input bg-transparent shadow-sm transition-colors placeholder:text-foreground focus-within:ring-2 ring-ring",
           className
         )}
       >
         <Input
-          className="h-auto bg-muted text-black dark:text-white border-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 w-full"
+          className="h-auto bg-muted text-foreground border-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 w-full"
           type={showPassword ? "text" : "password"}
           placeholder={placeholder}
           ref={ref}
