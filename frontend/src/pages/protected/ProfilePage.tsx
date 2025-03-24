@@ -61,6 +61,7 @@ import { Link } from "react-router-dom";
 import { ModeToggle } from "@/components/mode-toggle";
 import Paginator from "@/components/paginator";
 import { useSearchParams } from "react-router-dom";
+import { fetchLogOut } from "@/feature/authSlice";
 
 const addressSchema = z.object({
   name: z
@@ -106,7 +107,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState({
     fullName: userDetails?.fullName || "",
     email: userDetails?.email || "",
-    phone: userDetails?.phone || "",
+    phone: userDetails?.phoneNumber || "",
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -161,6 +162,7 @@ export default function ProfilePage() {
     allAddress();
     getProfileOrders("");
   }, []);
+
   const createAddress = useDispatchWithToast(fetchCreateAddress, {
     loadingMessage: "Adding Address...",
     getSuccessMessage(data) {
@@ -227,6 +229,16 @@ export default function ProfilePage() {
     });
     setDialogOpen(true);
   };
+
+  const logout = useDispatchWithToast(fetchLogOut, {
+    loadingMessage: "Logging out...",
+    getSuccessMessage() {
+      return "Logged out successfully";
+    },
+    getErrorMessage(error) {
+      return error.message || error || "Something went wrong while logging out";
+    },
+  });
 
   return (
     <div className="container mx-auto py-10 px-4 md:px-6 min-h-[calc(100vh-64px)]">
@@ -305,6 +317,7 @@ export default function ProfilePage() {
               <Button
                 variant="outline"
                 className="w-full justify-start text-destructive dark:text-red-500"
+                onClick={() => logout()}
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out

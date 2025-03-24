@@ -14,7 +14,7 @@ export interface UserDetails {
     emailNotifications: boolean;
     orderUpdates: boolean;
   };
-  phone?: string;
+  phoneNumber: string;
 }
 
 export const fetchUserDetails = createAsyncThunk(

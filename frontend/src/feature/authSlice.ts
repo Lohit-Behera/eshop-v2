@@ -80,6 +80,7 @@ export const fetchLogOut = createAsyncThunk(
         withCredentials: true,
       };
       const { data } = await axios.get(`${baseUrl}/api/v1/auth/logout`, config);
+      document.cookie = `userInfoEShop=; path=/; max-age=0; secure; sameSite=None;`;
       return data;
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;

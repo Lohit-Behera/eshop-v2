@@ -38,6 +38,8 @@ import { motion, MotionConfig } from "motion/react";
 import useClickOutside from "@/hooks/useClickOutside";
 import { ArrowLeft, Search } from "lucide-react";
 import { Input } from "./ui/input";
+import { useDispatchWithToast } from "@/hooks/dispatch";
+import { fetchLogOut } from "@/feature/authSlice";
 
 const transition = {
   type: "spring",
@@ -57,6 +59,17 @@ function Header() {
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const logout = useDispatchWithToast(fetchLogOut, {
+    loadingMessage: "Logging out...",
+    getSuccessMessage() {
+      return "Logged out successfully";
+    },
+    getErrorMessage(error) {
+      return error.message || error || "Something went wrong while logging out";
+    },
+  });
+
   const TABS = [
     {
       label: "Home",
@@ -259,7 +272,7 @@ function Header() {
                     <Settings2 className="mr-2" />
                     Setting
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logout()}>
                     <LogIn className="mr-2" />
                     Logout
                   </DropdownMenuItem>
