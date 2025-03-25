@@ -7,6 +7,7 @@ import reviewSlice from "@/feature/reviewSlice";
 import cartSlice from "@/feature/cartSlice";
 import addressSlice from "@/feature/addressSlice";
 import orderSlice from "@/feature/orderSlice";
+import bannerSlice from "@/feature/bannerSlice";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     cart: cartSlice,
     address: addressSlice,
     order: orderSlice,
+    banner: bannerSlice,
   },
 });
 

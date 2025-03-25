@@ -2,6 +2,16 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import { baseUrl } from "@/lib/proxy";
 
+// type
+export interface Banner {
+  _id: string;
+  link: string;
+  image: string;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+}
+
 export const fetchCreateBanner = createAsyncThunk(
   "banner/create",
   async (banner: FormData, { rejectWithValue }) => {
@@ -85,7 +95,7 @@ const bannerSlice = createSlice({
     createBannerStatus: "idle",
     createBannerError: {},
 
-    allBanners: { data: [] as any },
+    allBanners: { data: [] as Banner[] },
     allBannersStatus: "idle",
     allBannersError: {},
 

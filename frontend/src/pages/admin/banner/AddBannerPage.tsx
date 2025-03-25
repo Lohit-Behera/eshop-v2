@@ -101,7 +101,7 @@ function AddBannerPage() {
       </motion.div>
       <Card className="relative">
         <CardHeader>
-          <CardTitle>Add Product</CardTitle>
+          <CardTitle>Add Banner</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
