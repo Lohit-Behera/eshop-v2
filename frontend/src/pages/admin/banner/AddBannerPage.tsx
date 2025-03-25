@@ -28,7 +28,10 @@ import { motion } from "motion/react";
 import { fetchCreateBanner } from "@/feature/bannerSlice";
 
 const createBannerSchema = z.object({
-  link: z.string().url({ message: "Please enter a valid URL." }),
+  link: z
+    .string()
+    .min(3, { message: "Link must be at least 3 characters" })
+    .max(200, { message: "Link must be at most 200 characters" }),
   image: z
     .any()
     .refine((file) => file instanceof File, {
@@ -62,7 +65,7 @@ function AddBannerPage() {
         link: "",
         image: undefined,
       });
-      navigate("/admin/banners");
+      navigate("/admin/banner");
       return data.message || "Banner added successfully";
     },
     getErrorMessage(error) {

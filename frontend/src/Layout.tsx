@@ -9,6 +9,7 @@ import { useAsyncDispatch } from "./hooks/dispatch";
 import { fetchAllAddresses } from "./feature/addressSlice";
 import { fetchGetCart } from "./feature/cartSlice";
 import { fetchUniqueBrands } from "./feature/productSlice";
+import { fetchAllBanners } from "./feature/bannerSlice";
 
 function Layout() {
   const location = useLocation();
@@ -18,6 +19,7 @@ function Layout() {
   const fetchAddresses = useAsyncDispatch(fetchAllAddresses);
   const fetchCart = useAsyncDispatch(fetchGetCart);
   const fetchBrands = useAsyncDispatch(fetchUniqueBrands);
+  const fetchBanner = useAsyncDispatch(fetchAllBanners);
   const userDetailsStatus = useSelector(
     (state: RootState) => state.user.userDetailsStatus
   );
@@ -29,6 +31,7 @@ function Layout() {
       fetchDetails();
       fetchAddresses();
       fetchCart();
+      fetchBanner();
     }
   }, [userInfo]);
 

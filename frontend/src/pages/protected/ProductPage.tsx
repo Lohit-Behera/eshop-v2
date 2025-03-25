@@ -18,7 +18,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/ui/carousel";
+} from "@/components/ui/carousel-motion";
 import Reviews from "@/components/Reviews";
 import { fetchAddToCart } from "@/feature/cartSlice";
 import { TextMorph } from "@/components/ui/text-morph";
@@ -135,7 +135,7 @@ function ProductPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h1 className="text-xl md:text-2xl font-bold mb-4">
+              <h1 className="text-base md:text-2xl font-bold mb-4">
                 {product.name}
               </h1>
               <p className="text-xl font-semibold mb-2">

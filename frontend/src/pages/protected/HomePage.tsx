@@ -5,10 +5,22 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import ProductCard from "@/components/product-card";
 import { motion } from "motion/react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import { Link } from "react-router-dom";
 
 function HomePage() {
   const products = useSelector(
     (state: RootState) => state.product.homeProducts.data
+  );
+  const banner = useSelector(
+    (state: RootState) => state.banner.allBanners.data
   );
   const homeProducts = useAsyncDispatch(fetchHomeProducts);
   useEffect(() => {
@@ -20,7 +32,7 @@ function HomePage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05,
+        staggerChildren: 0.1,
       },
     },
   };
@@ -36,6 +48,31 @@ function HomePage() {
 
   return (
     <section className="container py-12 md:py-16">
+      <Carousel
+        className="relative mb-8"
+        plugins={[
+          Autoplay({
+            delay: 3000,
+          }),
+        ]}
+      >
+        <CarouselContent>
+          {banner.map((banner) => (
+            <CarouselItem key={banner._id}>
+              <Link to={banner.link}>
+                <img
+                  src={banner.image}
+                  alt="banner"
+                  className="w-full h-[60vh] object-cover rounded-md"
+                />
+              </Link>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2" />
+      </Carousel>
+
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
           Featured Products
