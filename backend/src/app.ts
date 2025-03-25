@@ -32,6 +32,7 @@ import reviewRouter from "./routes/review.routes";
 import cartRouter from "./routes/cart.routes";
 import addressRouter from "./routes/address.routes";
 import orderRouter from "./routes/order.routes";
+import bannerRouter from "./routes/banner.routes";
 
 // Routes
 app.use("/api/v1/auth", authRouter);
@@ -42,5 +43,6 @@ app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/address", addressRouter);
 app.use("/api/v1/order", orderRouter);
+app.use("/api/v1/banner", bannerRouter);
 
 export { app };

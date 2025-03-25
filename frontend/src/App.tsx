@@ -33,6 +33,7 @@ import UpdateCategoryPage from "./pages/admin/category/UpdateCategoryPage";
 import AddProductPage from "./pages/admin/product/AddProductPage";
 import ProductListPage from "./pages/admin/product/ProductListPage";
 import UpdateProductPage from "./pages/admin/product/UpdateProductPage";
+import AddBannerPage from "./pages/admin/banner/AddBannerPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -69,6 +70,8 @@ const router = createBrowserRouter(
           path="/admin/product/update/:productId"
           element={<UpdateProductPage />}
         />
+        {/* Admin Banner */}
+        <Route path="/admin/banner/add" element={<AddBannerPage />} />
       </Route>
     </Route>
   )
