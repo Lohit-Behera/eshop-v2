@@ -296,14 +296,6 @@ export default function ProfilePage() {
                   Addresses
                 </Button>
                 <Button
-                  variant={activeTab === "payment" ? "secondary" : "ghost"}
-                  className="justify-start"
-                  onClick={() => setActiveTab("payment")}
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Payment Methods
-                </Button>
-                <Button
                   variant={activeTab === "settings" ? "secondary" : "ghost"}
                   className="justify-start"
                   onClick={() => setActiveTab("settings")}
@@ -338,9 +330,6 @@ export default function ProfilePage() {
               </TabsTrigger>
               <TabsTrigger value="addresses">
                 <MapPin className="h-4 w-4" />
-              </TabsTrigger>
-              <TabsTrigger value="payment">
-                <CreditCard className="h-4 w-4" />
               </TabsTrigger>
               <TabsTrigger value="settings">
                 <Settings className="h-4 w-4" />
@@ -647,51 +636,6 @@ export default function ProfilePage() {
                 >
                   Add New Address
                 </Button>
-              </CardFooter>
-            </Card>
-          )}
-
-          {activeTab === "payment" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Methods</CardTitle>
-                <CardDescription>Manage your payment options</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { type: "Visa", last4: "4242", expiry: "04/25" },
-                    { type: "Mastercard", last4: "5555", expiry: "08/24" },
-                  ].map((card, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="border rounded-lg p-4"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-16 bg-muted rounded flex items-center justify-center">
-                            <span className="font-medium">{card.type}</span>
-                          </div>
-                          <div>
-                            <p className="font-medium">•••• {card.last4}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Expires {card.expiry}
-                            </p>
-                          </div>
-                        </div>
-                        {index === 0 && (
-                          <Badge variant="outline">Default</Badge>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button>Add Payment Method</Button>
               </CardFooter>
             </Card>
           )}
