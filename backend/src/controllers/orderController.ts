@@ -316,6 +316,54 @@ const verifyCashFreePayment = asyncHandler(async (req, res) => {
   }
 });
 
+const orderAdminList = asyncHandler(async (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 50;
+  const aggregateQuery = Order.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: {
+        path: "$user",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        grandTotal: 1,
+        status: 1,
+        paymentStatus: 1,
+        paymentMethod: 1,
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phoneNumber: "$user.phoneNumber",
+        createdAt: 1,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
+
+  const orders = await Order.aggregatePaginate(aggregateQuery, { page, limit });
+
+  if (!orders || orders.docs.length === 0) {
+    return res.status(404).json(new ApiResponse(404, null, "Orders not found"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, orders, "Orders fetched successfully"));
+});
+
 export {
   orderInitializeRazorpay,
   verifyRazorpayPayment,
@@ -323,4 +371,5 @@ export {
   profileOrderList,
   verifyCashFreePayment,
   orderInitializeCashFree,
+  orderAdminList,
 };

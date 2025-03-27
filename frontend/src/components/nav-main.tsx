@@ -1,4 +1,4 @@
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, ClipboardList, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -66,6 +66,12 @@ export function NavMain({
             </SidebarMenuItem>
           </Collapsible>
         ))}
+        <SidebarMenuButton asChild>
+          <Link to="/admin/orders">
+            <ClipboardList />
+            Orders
+          </Link>
+        </SidebarMenuButton>
       </SidebarMenu>
     </SidebarGroup>
   );

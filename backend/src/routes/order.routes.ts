@@ -6,8 +6,10 @@ import {
   verifyRazorpayPayment,
   verifyCashFreePayment,
   orderInitializeCashFree,
+  orderAdminList,
 } from "../controllers/orderController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { adminMiddleware } from "../middlewares/adminMiddleware";
 import { rawBodyMiddleware } from "../middlewares/rawBodyMiddleware";
 
 const orderRouter = Router();
@@ -28,5 +30,12 @@ orderRouter.post(
   orderInitializeCashFree
 );
 orderRouter.post("/verify/cashfree", rawBodyMiddleware, verifyCashFreePayment);
+
+orderRouter.get(
+  "/admin/orders",
+  authMiddleware,
+  adminMiddleware,
+  orderAdminList
+);
 
 export default orderRouter;

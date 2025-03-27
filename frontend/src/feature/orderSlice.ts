@@ -45,11 +45,35 @@ interface ProfileOrders extends Order {
     shippingPrice: number;
     tax: number;
     grandTotal: number;
-    status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
-    paymentStatus: "Pending" | "Paid" | "Failed";
-    paymentMethod: "Razorpay" | "PayPal" | "Stripe";
+    status: string;
+    paymentStatus: string;
+    paymentMethod: string;
     createdAt: string;
     updatedAt: string;
+  }[];
+  totalDocs: number;
+  limit: number;
+  page: number;
+  totalPages: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: null | number;
+  nextPage: null | number;
+}
+
+interface AdminOrderList {
+  _id: string;
+  docs: {
+    _id: string;
+    grandTotal: number;
+    status: string;
+    paymentStatus: string;
+    paymentMethod: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    createdAt: string;
   }[];
   totalDocs: number;
   limit: number;
@@ -149,6 +173,32 @@ export const fetchProfileOrder = createAsyncThunk(
   }
 );
 
+export const fetchOrderAdminList = createAsyncThunk(
+  "order/orderAdminList",
+  async (query: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.get(
+        `${baseUrl}/api/v1/order/admin/orders?${query}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting order";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState: {
@@ -159,6 +209,10 @@ const orderSlice = createSlice({
     profileOrder: { data: {} as ProfileOrders },
     profileOrderStatus: "idle",
     profileOrderError: {},
+
+    orderAdminList: { data: {} as AdminOrderList },
+    orderAdminListStatus: "idle",
+    orderAdminListError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -187,6 +241,20 @@ const orderSlice = createSlice({
       .addCase(fetchProfileOrder.rejected, (state, action) => {
         state.profileOrderStatus = "failed";
         state.profileOrderError =
+          action.payload || "Something went wrong while getting order";
+      })
+
+      // admin order list
+      .addCase(fetchOrderAdminList.pending, (state) => {
+        state.orderAdminListStatus = "loading";
+      })
+      .addCase(fetchOrderAdminList.fulfilled, (state, action) => {
+        state.orderAdminListStatus = "succeeded";
+        state.orderAdminList = action.payload;
+      })
+      .addCase(fetchOrderAdminList.rejected, (state, action) => {
+        state.orderAdminListStatus = "failed";
+        state.orderAdminListError =
           action.payload || "Something went wrong while getting order";
       });
   },
