@@ -383,6 +383,31 @@ const orderAdminList = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, orders, "Orders fetched successfully"));
 });
 
+const orderUpdate = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const { status, paymentStatus } = req.body;
+  const order = await Order.findById(orderId);
+  if (!order) {
+    return res.status(404).json(new ApiResponse(404, null, "Order not found"));
+  }
+  let hasUpdated = false;
+  if (status) {
+    order.status = status;
+    hasUpdated = true;
+  }
+  if (paymentStatus) {
+    order.paymentStatus = paymentStatus;
+    hasUpdated = true;
+  }
+  if (!hasUpdated) {
+    return res.status(400).json(new ApiResponse(400, null, "No changes found"));
+  }
+  await order.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Order updated successfully"));
+});
+
 export {
   orderInitializeRazorpay,
   verifyRazorpayPayment,
@@ -391,4 +416,5 @@ export {
   verifyCashFreePayment,
   orderInitializeCashFree,
   orderAdminList,
+  orderUpdate,
 };

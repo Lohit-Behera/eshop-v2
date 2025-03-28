@@ -5,7 +5,7 @@ import { Product } from "./cartSlice";
 
 export interface Order {
   _id: string;
-  user: string;
+  userId: string;
   products: Product[];
   shippingAddress: {
     _id: string;
@@ -199,6 +199,36 @@ export const fetchOrderAdminList = createAsyncThunk(
   }
 );
 
+export const fetchUpdateOrder = createAsyncThunk(
+  "order/update",
+  async (
+    order: { orderId: string; status: string; paymentStatus: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.patch(
+        `${baseUrl}/api/v1/order/admin/update/${order.orderId}`,
+        order,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting order";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState: {
@@ -213,6 +243,10 @@ const orderSlice = createSlice({
     orderAdminList: { data: {} as AdminOrderList },
     orderAdminListStatus: "idle",
     orderAdminListError: {},
+
+    updateOrder: {},
+    updateOrderStatus: "idle",
+    updateOrderError: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -255,6 +289,20 @@ const orderSlice = createSlice({
       .addCase(fetchOrderAdminList.rejected, (state, action) => {
         state.orderAdminListStatus = "failed";
         state.orderAdminListError =
+          action.payload || "Something went wrong while getting order";
+      })
+
+      // update order
+      .addCase(fetchUpdateOrder.pending, (state) => {
+        state.updateOrderStatus = "loading";
+      })
+      .addCase(fetchUpdateOrder.fulfilled, (state, action) => {
+        state.updateOrderStatus = "succeeded";
+        state.updateOrder = action.payload;
+      })
+      .addCase(fetchUpdateOrder.rejected, (state, action) => {
+        state.updateOrderStatus = "failed";
+        state.updateOrderError =
           action.payload || "Something went wrong while getting order";
       });
   },

@@ -7,6 +7,7 @@ import {
   verifyCashFreePayment,
   orderInitializeCashFree,
   orderAdminList,
+  orderUpdate,
 } from "../controllers/orderController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { adminMiddleware } from "../middlewares/adminMiddleware";
@@ -36,6 +37,13 @@ orderRouter.get(
   authMiddleware,
   adminMiddleware,
   orderAdminList
+);
+
+orderRouter.patch(
+  "/admin/update/:orderId",
+  authMiddleware,
+  adminMiddleware,
+  orderUpdate
 );
 
 export default orderRouter;
