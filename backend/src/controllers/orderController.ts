@@ -319,7 +319,26 @@ const verifyCashFreePayment = asyncHandler(async (req, res) => {
 const orderAdminList = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 50;
+  const { status, paymentStatus, paymentMethod } = req.query;
+
+  const matchStage: Record<string, any> = {};
+
+  if (status && status !== "All") {
+    matchStage.status = status;
+  }
+
+  if (paymentStatus && paymentStatus !== "All") {
+    matchStage.paymentStatus = paymentStatus;
+  }
+
+  if (paymentMethod && paymentMethod !== "All") {
+    matchStage.paymentMethod = paymentMethod;
+  }
+
   const aggregateQuery = Order.aggregate([
+    {
+      $match: matchStage,
+    },
     {
       $lookup: {
         from: "users",

@@ -28,7 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { useAsyncDispatch } from "@/hooks/dispatch";
 import { fetchOrderAdminList } from "@/feature/orderSlice";
@@ -36,6 +36,7 @@ import { RootState } from "@/store/store";
 import { useSelector } from "react-redux";
 import { formatPrice } from "@/lib/utils";
 import { TextMorph } from "@/components/ui/text-morph";
+import Paginator from "@/components/paginator";
 
 const statusOptions = [
   "All",
@@ -50,6 +51,8 @@ const paymentMethodOptions = ["All", "Razorpay", "CashFree"];
 
 export default function OrderAdminPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  console.log(searchParams.toString());
 
   const [showFilters, setShowFilters] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -60,6 +63,12 @@ export default function OrderAdminPage() {
     grandTotal: number;
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "All",
+    paymentStatus: "All",
+    paymentMethod: "All",
+    limit: "50",
+  });
 
   const adminOrderList = useAsyncDispatch(fetchOrderAdminList);
   const orderStatus = useSelector(
@@ -72,12 +81,20 @@ export default function OrderAdminPage() {
   const orders = orderData.docs || [];
 
   useEffect(() => {
-    adminOrderList("");
-  }, []);
+    adminOrderList(searchParams.toString());
+  }, [searchParams]);
 
   // Handle edit order
   const handleEditOrder = (orderId: string) => {
-    navigate(`/admin/orders/edit/${orderId}`);
+    navigate(`/admin/orders/update/${orderId}`);
+  };
+
+  // Handle set filter
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: value,
+    }));
   };
 
   // Handle delete order
@@ -96,8 +113,17 @@ export default function OrderAdminPage() {
     console.log(orderToDelete);
   };
 
+  // Handle apply filters
+  const handleApplyFilters = () => {
+    searchParams.set("status", filters.status);
+    searchParams.set("paymentStatus", filters.paymentStatus);
+    searchParams.set("paymentMethod", filters.paymentMethod);
+    searchParams.set("limit", filters.limit);
+    setSearchParams(searchParams);
+  };
+
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-4 w-full min-h-[80vh]">
       {/* Search and filter bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-end">
         <Button
@@ -122,14 +148,14 @@ export default function OrderAdminPage() {
           >
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Order Status</label>
                     <Select
-                    // value={filters.status}
-                    // onValueChange={(value) =>
-                    //   handleFilterChange("status", value)
-                    // }
+                      value={filters.status}
+                      onValueChange={(value) =>
+                        handleFilterChange("status", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -149,10 +175,10 @@ export default function OrderAdminPage() {
                       Payment Status
                     </label>
                     <Select
-                    // value={filters.paymentStatus}
-                    // onValueChange={(value) =>
-                    //   handleFilterChange("paymentStatus", value)
-                    // }
+                      value={filters.paymentStatus}
+                      onValueChange={(value) =>
+                        handleFilterChange("paymentStatus", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select payment status" />
@@ -172,10 +198,10 @@ export default function OrderAdminPage() {
                       Payment Method
                     </label>
                     <Select
-                    // value={filters.paymentMethod}
-                    // onValueChange={(value) =>
-                    //   handleFilterChange("paymentMethod", value)
-                    // }
+                      value={filters.paymentMethod}
+                      onValueChange={(value) =>
+                        handleFilterChange("paymentMethod", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select payment method" />
@@ -189,10 +215,34 @@ export default function OrderAdminPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Limit</label>
+                    <Select
+                      value={filters.limit}
+                      onValueChange={(value) =>
+                        handleFilterChange("limit", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select limit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={"10"}>10</SelectItem>
+                        <SelectItem value={"20"}>20</SelectItem>
+                        <SelectItem value={"30"}>30</SelectItem>
+                        <SelectItem value={"40"}>40</SelectItem>
+                        <SelectItem value={"50"}>50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="justify-end">
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleApplyFilters}
+                >
                   Apply Filters
                 </Button>
               </CardFooter>
@@ -281,7 +331,7 @@ export default function OrderAdminPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {order.grandTotal}
+                    {formatPrice(order.grandTotal)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -316,6 +366,11 @@ export default function OrderAdminPage() {
             )}
           </TableBody>
         </Table>
+        <Paginator
+          currentPage={orderData.page}
+          totalPages={orderData.totalPages}
+          showPreviousNext={true}
+        />
       </div>
 
       {/* Delete confirmation dialog */}

@@ -6,7 +6,7 @@ import {
 import { generatePaginationLinks } from "./generate-pagination-links";
 import { Button } from "./ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 type PaginatorProps = {
   currentPage: number;
@@ -19,7 +19,15 @@ export default function Paginator({
   totalPages,
   showPreviousNext,
 }: PaginatorProps) {
-  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
+
+  const handlePageChange = (page: number) => {
+    setSearchParams((prev) => {
+      prev.set("page", page.toString());
+      return prev;
+    });
+  };
+
   return (
     <Pagination>
       <PaginationContent>
@@ -27,7 +35,7 @@ export default function Paginator({
           <PaginationItem>
             <Button
               variant={"ghost"}
-              onClick={() => navigate(`?page=${currentPage - 1}`)}
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
               <ChevronLeftIcon className="h-4 w-4" />
@@ -40,7 +48,7 @@ export default function Paginator({
           <PaginationItem>
             <Button
               variant={"ghost"}
-              onClick={() => navigate(`?page=${currentPage + 1}`)}
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
               <span>Next</span>
