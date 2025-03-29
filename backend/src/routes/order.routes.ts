@@ -8,6 +8,7 @@ import {
   orderInitializeCashFree,
   orderAdminList,
   orderUpdate,
+  deleteOrder,
 } from "../controllers/orderController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { adminMiddleware } from "../middlewares/adminMiddleware";
@@ -44,6 +45,13 @@ orderRouter.patch(
   authMiddleware,
   adminMiddleware,
   orderUpdate
+);
+
+orderRouter.delete(
+  "/admin/delete/:orderId",
+  authMiddleware,
+  adminMiddleware,
+  deleteOrder
 );
 
 export default orderRouter;

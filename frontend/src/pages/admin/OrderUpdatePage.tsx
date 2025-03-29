@@ -104,7 +104,11 @@ export default function OrderEditForm() {
     },
     getErrorMessage(error) {
       setIsSaving(false);
-      return error.message || error || "Failed to update order";
+      return (
+        error.response?.data?.message ??
+        error.message ??
+        "Failed to update order"
+      );
     },
   });
 

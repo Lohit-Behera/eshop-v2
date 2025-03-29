@@ -408,6 +408,23 @@ const orderUpdate = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Order updated successfully"));
 });
 
+const deleteOrder = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const order = await Order.findById(orderId);
+  if (!order) {
+    return res.status(404).json(new ApiResponse(404, null, "Order not found"));
+  }
+  if (order.paymentStatus !== "Failed" && order.paymentStatus !== "Pending") {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, "Order not deletable"));
+  }
+  await Order.findByIdAndDelete(orderId);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Order deleted successfully"));
+});
+
 export {
   orderInitializeRazorpay,
   verifyRazorpayPayment,
@@ -417,4 +434,5 @@ export {
   orderInitializeCashFree,
   orderAdminList,
   orderUpdate,
+  deleteOrder,
 };

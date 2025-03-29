@@ -229,6 +229,32 @@ export const fetchUpdateOrder = createAsyncThunk(
   }
 );
 
+export const fetchDeleteOrder = createAsyncThunk(
+  "order/delete",
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.delete(
+        `${baseUrl}/api/v1/order/admin/delete/${orderId}`,
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting order";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState: {
