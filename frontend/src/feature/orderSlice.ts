@@ -255,6 +255,33 @@ export const fetchDeleteOrder = createAsyncThunk(
   }
 );
 
+export const fetchCancelOrder = createAsyncThunk(
+  "order/cancel",
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.post(
+        `${baseUrl}/api/v1/order/cancel/${orderId}`,
+        {},
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "Something went wrong while getting order";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState: {

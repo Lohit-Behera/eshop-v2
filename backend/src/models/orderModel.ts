@@ -33,7 +33,13 @@ export interface IOrder extends Document {
   shippingPrice: number;
   tax: number;
   grandTotal: number;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  status:
+    | "Pending"
+    | "Processing"
+    | "Shipped"
+    | "Delivered"
+    | "Cancelled"
+    | "Cancellation Requested";
   paymentStatus: "Pending" | "Paid" | "Failed";
   paymentMethod: "Razorpay" | "CashFree";
   razorpay?: {
@@ -82,7 +88,14 @@ const OrderSchema = new Schema<IOrder>(
     grandTotal: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+      enum: [
+        "Pending",
+        "Processing",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+        "Cancellation Requested",
+      ],
       default: "Pending",
     },
     paymentStatus: {

@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Loader2,
   Download,
+  Ban,
 } from "lucide-react";
 import {
   Card,
@@ -33,10 +34,11 @@ import {
 import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { useAsyncDispatch } from "@/hooks/dispatch";
-import { fetchGetOrder, Order } from "@/feature/orderSlice";
+import { useAsyncDispatch, useDispatchWithToast } from "@/hooks/dispatch";
+import { fetchCancelOrder, fetchGetOrder, Order } from "@/feature/orderSlice";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { TextMorph } from "@/components/ui/text-morph";
 
 // Format currency
 const formatCurrency = (amount: number) => {
@@ -233,6 +235,8 @@ export default function OrderPage() {
   );
 
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const toggleProductExpand = (productId: string) => {
     if (expandedProduct === productId) {
       setExpandedProduct(null);
@@ -269,6 +273,22 @@ export default function OrderPage() {
       fetchOrder(orderId);
     }
   }, [orderId]);
+
+  const cancelOrder = useDispatchWithToast(fetchCancelOrder, {
+    loadingMessage: "Cancelling order...",
+    getSuccessMessage(data) {
+      setLoading(false);
+      fetchOrder(orderData._id);
+      return data.message || "Order cancelled successfully";
+    },
+    getErrorMessage(error) {
+      setLoading(false);
+      return error.message || "Something went wrong while cancelling order";
+    },
+  });
+  const handleCancelOrder = async () => {
+    cancelOrder(orderData._id);
+  };
   return (
     <>
       {orderStatus === "loading" ? (
@@ -306,6 +326,25 @@ export default function OrderPage() {
                 <div className="flex flex-col sm:flex-row gap-2">
                   <StatusBadge status={orderData.status} />
                   <StatusBadge status={orderData.paymentStatus} />
+                  {orderData.status === "Processing" ||
+                    orderData.status === "Shipped" ||
+                    (orderData.status === "Pending" && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleCancelOrder}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Ban className="h-4 w-4" />
+                        )}
+                        <TextMorph>
+                          {loading ? "Cancelling..." : "Cancel Order"}
+                        </TextMorph>
+                      </Button>
+                    ))}
                 </div>
               </div>
             </motion.div>

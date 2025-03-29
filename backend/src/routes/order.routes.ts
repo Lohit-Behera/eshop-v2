@@ -9,6 +9,7 @@ import {
   orderAdminList,
   orderUpdate,
   deleteOrder,
+  cancelOrder,
 } from "../controllers/orderController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { adminMiddleware } from "../middlewares/adminMiddleware";
@@ -53,5 +54,7 @@ orderRouter.delete(
   adminMiddleware,
   deleteOrder
 );
+
+orderRouter.post("/cancel/:orderId", authMiddleware, cancelOrder);
 
 export default orderRouter;

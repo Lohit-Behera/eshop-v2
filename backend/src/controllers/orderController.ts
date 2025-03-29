@@ -425,6 +425,46 @@ const deleteOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Order deleted successfully"));
 });
 
+const cancelOrder = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const order = await Order.findById(orderId);
+  if (!order) {
+    return res.status(404).json(new ApiResponse(404, null, "Order not found"));
+  }
+
+  if (order.status === "Delivered") {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, "Order already delivered"));
+  }
+
+  if (
+    order.status === "Cancelled" ||
+    order.status === "Cancellation Requested"
+  ) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, "Order already cancelled"));
+  }
+
+  if (order.paymentStatus === "Failed" || order.paymentStatus === "Pending") {
+    order.status = "Cancelled";
+    await order.save();
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "Order canceled successfully"));
+  }
+
+  order.status = "Cancellation Requested";
+  await order.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, null, "Order cancellation request sent successfully")
+    );
+});
+
 export {
   orderInitializeRazorpay,
   verifyRazorpayPayment,
@@ -435,4 +475,5 @@ export {
   orderAdminList,
   orderUpdate,
   deleteOrder,
+  cancelOrder,
 };
