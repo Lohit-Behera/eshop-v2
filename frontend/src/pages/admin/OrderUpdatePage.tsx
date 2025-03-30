@@ -142,7 +142,7 @@ export default function OrderEditForm() {
               <h2 className="text-xl font-semibold">
                 Order #{order._id.substring(0, 8)}...
               </h2>
-              <div className="ml-auto">
+              <div className="ml-auto flex flex-col md:flex-row gap-2">
                 <Button
                   type="submit"
                   disabled={isSaving}
@@ -169,6 +169,9 @@ export default function OrderEditForm() {
                       : "Save Changes"}
                   </TextMorph>
                 </Button>
+                {order.status === "Cancellation Requested" && (
+                  <Button>Cancellation Conform</Button>
+                )}
               </div>
             </div>
 

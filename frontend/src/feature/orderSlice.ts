@@ -23,7 +23,13 @@ export interface Order {
   shippingPrice: number;
   tax: number;
   grandTotal: number;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  status:
+    | "Pending"
+    | "Processing"
+    | "Shipped"
+    | "Delivered"
+    | "Cancelled"
+    | "Cancellation Requested";
   paymentStatus: "Pending" | "Paid" | "Failed";
   paymentMethod: "Razorpay" | "PayPal" | "Stripe";
   razorpay?: {

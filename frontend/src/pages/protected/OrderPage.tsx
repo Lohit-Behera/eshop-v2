@@ -191,31 +191,38 @@ const StatusBadge = ({ status }: { status: string }) => {
 
   switch (status) {
     case "Pending":
-      color = "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
+      color =
+        "bg-yellow-100 dark:bg-yellow-600 text-yellow-800 dark:text-yellow-100 hover:bg-yellow-100";
       icon = <Clock className="h-3 w-3 mr-1" />;
       break;
     case "Processing":
-      color = "bg-blue-100 text-blue-800 hover:bg-blue-100";
+      color =
+        "bg-blue-100 dark:bg-blue-600 text-blue-800 dark:text-blue-100 hover:bg-blue-100";
       icon = <Clock className="h-3 w-3 mr-1" />;
       break;
     case "Shipped":
-      color = "bg-purple-100 text-purple-800 hover:bg-purple-100";
+      color =
+        "bg-purple-100 dark:bg-purple-600 text-purple-800 dark:text-purple-100 hover:bg-purple-100";
       icon = <Truck className="h-3 w-3 mr-1" />;
       break;
     case "Delivered":
-      color = "bg-green-100 text-green-800 hover:bg-green-100";
+      color =
+        "bg-green-100 dark:bg-green-600 text-green-800 dark:text-green-100 hover:bg-green-100";
       icon = <CheckCircle2 className="h-3 w-3 mr-1" />;
       break;
     case "Cancelled":
-      color = "bg-red-100 text-red-800 hover:bg-red-100";
+      color =
+        "bg-red-100 dark:bg-red-600 text-red-800 dark:text-red-100 hover:bg-red-100";
       icon = <AlertCircle className="h-3 w-3 mr-1" />;
       break;
     case "Paid":
-      color = "bg-green-100 text-green-800 hover:bg-green-100";
+      color =
+        "bg-green-100 dark:bg-green-600 text-green-800 dark:text-green-100 hover:bg-green-100";
       icon = <CheckCircle2 className="h-3 w-3 mr-1" />;
       break;
     default:
-      color = "bg-gray-100 text-gray-800 hover:bg-gray-100";
+      color =
+        "bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-100 hover:bg-gray-100";
       icon = <AlertCircle className="h-3 w-3 mr-1" />;
   }
 

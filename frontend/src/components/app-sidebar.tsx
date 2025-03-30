@@ -21,7 +21,7 @@ const data = {
   navMain: [
     {
       title: "Product",
-      url: "#",
+      url: "/admin/product",
       icon: Package2,
       isActive: true,
       items: [
@@ -39,7 +39,7 @@ const data = {
     },
     {
       title: "Category",
-      url: "#",
+      url: "/admin/category",
       icon: LayoutGrid,
       items: [
         {
@@ -56,7 +56,7 @@ const data = {
     },
     {
       title: "Banner",
-      url: "#",
+      url: "/admin/banner",
       icon: Image,
       items: [
         {
