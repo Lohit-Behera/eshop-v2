@@ -43,6 +43,9 @@ export default function Reviews({ productId }: { productId: string }) {
   const reviews = useSelector(
     (state: RootState) => state.review.getAllReviews.data
   );
+  const reviewsStatus = useSelector(
+    (state: RootState) => state.review.getAllReviewsStatus
+  );
   // State for the new review form
   const [newReview, setNewReview] = useState({
     rating: 0,
@@ -69,7 +72,7 @@ export default function Reviews({ productId }: { productId: string }) {
   const getReviews = useAsyncDispatch(fetchGetAllReviews);
 
   useEffect(() => {
-    if (reviews.length === 0) {
+    if (reviews.length === 0 && reviewsStatus === "idle") {
       getReviews(productId);
     }
   }, [getReviews, productId]);
