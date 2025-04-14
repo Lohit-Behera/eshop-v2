@@ -43,6 +43,33 @@ export const fetchUserDetails = createAsyncThunk(
   }
 );
 
+export const fetchUpdateAvatar = createAsyncThunk(
+  "user/updateAvatar",
+  async (avatar: File, { rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      };
+      const { data } = await axios.patch(
+        `${baseUrl}/api/v1/users/update/avatar`,
+        { avatar },
+        config
+      );
+      return data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      const errorMessage =
+        err.response?.data?.message ??
+        err.message ??
+        "An unknown error occurred";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CreditCard,
@@ -62,6 +62,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import Paginator from "@/components/paginator";
 import { useSearchParams } from "react-router-dom";
 import { fetchLogOut } from "@/feature/authSlice";
+import AvatarDialog from "@/components/avatar-dialog";
 
 const addressSchema = z.object({
   name: z
@@ -109,6 +110,8 @@ export default function ProfilePage() {
     email: userDetails?.email || "",
     phone: userDetails?.phoneNumber || "",
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [action, setAction] = useState({
@@ -240,6 +243,14 @@ export default function ProfilePage() {
     },
   });
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAvatarDialogOpen(true);
+      setSelectedFile(file);
+    }
+  };
+
   return (
     <div className="container mx-auto py-10 px-4 md:px-6 min-h-[calc(100vh-64px)]">
       <motion.div
@@ -362,9 +373,29 @@ export default function ProfilePage() {
                       <User2 className="h-8 w-8" />
                     </AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" size="sm">
-                    Change Avatar
-                  </Button>
+                  {avatarDialogOpen ? (
+                    <AvatarDialog
+                      open={avatarDialogOpen}
+                      setOpen={setAvatarDialogOpen}
+                      selectedFile={selectedFile}
+                      setSelectedFile={setSelectedFile}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <input
+                        id="file-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleFileChange(e)}
+                      />
+                      <Button asChild variant="outline" size="sm">
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          Change Avatar
+                        </label>
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <Separator />
                 <div className="grid gap-4">
